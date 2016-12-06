@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>Notes_absence</display-name>
+
+	<!-- Titre de l'application -->
+	<context-param>
+		<param-name>title</param-name>
+		<param-value>Notes Abscence</param-value>
+	</context-param>
+	
+	<!-- URLs communes aux vues -->
+	<context-param>
+		<param-name>header</param-name>
+		<param-value>/WEB-INF/JSP/shared/enTete.jsp</param-value>
+	</context-param>
+	<context-param>
+		<param-name>footer</param-name>
+		<param-value>/WEB-INF/JSP/shared/piedDePage.jsp</param-value>
+	</context-param>
+
+
+	<!--========= Jeu (v3) =========== -->
+	<!-- Servlet controleur -->
+	<servlet>
+		<servlet-name>controler</servlet-name>
+		<servlet-class>notes_absence.controler.Controler</servlet-class>
+		<init-param>
+			<param-name>urlList</param-name>
+			<param-value>/WEB-INF/JSP/list.jsp</param-value>
+		</init-param>
+		<init-param>
+			<param-name>urlDetail</param-name>
+			<param-value>/WEB-INF/JSP/detail.jsp</param-value>
+		</init-param>
+	</servlet>
+
+	<!-- Mapping URL/Servlet -->
+	<servlet-mapping>
+		<servlet-name>controler</servlet-name>
+		<url-pattern>/do/*</url-pattern>
+	</servlet-mapping>
+	
+	<!--  fichiers d'accueil -->
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>
