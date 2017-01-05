@@ -5,6 +5,7 @@ public class Etudiant {
 	private Integer id;
 	private String prenom;
 	private String nom;
+	private Formation formation;
 	
 	public Etudiant() {
 		super();
@@ -39,5 +40,13 @@ public class Etudiant {
 
 	public void setNom(String nom) {
 		this.nom = nom;
+	}
+	
+	public Formation getFormation() {
+		return formation;
+	}
+
+	public void setFormation(Formation formation) {
+		this.formation = formation;
 	}
 }

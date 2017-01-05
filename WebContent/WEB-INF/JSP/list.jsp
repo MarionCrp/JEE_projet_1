@@ -35,15 +35,22 @@
 	<tr>
 	  <th>Nom</th>
 	  <th>Prénom</th>
+	  <th>Formation</th>
 	  <th>Moyenne</th>
 	  <th>Abscence</th>
+	  <th></th>
 	</tr>
 	<% for (Etudiant etu : etudiants) { %>
 		<tr>
 		  <td><a href="detail?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>
 		  <td><%= etu.getPrenom() %></td>
+		  <td><%= etu.getFormation().getIntitule() %></td>
 		  <td>15.5</td>
 		  <td>0</td>
+		  <td>
+		  	<a href="detail?id=<%= etu.getId() %>" class="btn btn-default">
+			  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+			</a>
 		</tr>
 		<%
 	} %>

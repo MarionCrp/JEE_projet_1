@@ -21,8 +21,6 @@
 		<param-value>/WEB-INF/JSP/shared/piedDePage.jsp</param-value>
 	</context-param>
 
-
-	<!--========= Jeu (v3) =========== -->
 	<!-- Servlet controleur -->
 	<servlet>
 		<servlet-name>controler</servlet-name>

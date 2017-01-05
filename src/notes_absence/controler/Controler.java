@@ -2,6 +2,7 @@ package notes_absence.controler;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.*;
 
 import aideProjet.*;
 
@@ -83,7 +84,6 @@ public class Controler extends HttpServlet {
 			throws ServletException, IOException {
 		Collection<Etudiant> etudiants = GestionFactory.getEtudiants();
 		request.setAttribute("etudiants", etudiants);
-
 		loadJSP(urlList, request, response);
 
 	}
@@ -126,6 +126,9 @@ public class Controler extends HttpServlet {
 
 		ServletContext sc = getServletContext();
 		RequestDispatcher rd = sc.getRequestDispatcher(url);
+		//RequestDispatcher rheader = getServletContext().getRequestDispatcher(\"header\");
+
+		//rheader.include(request, response);
 		rd.forward(request, response);
 	}
 }

@@ -1,6 +1,8 @@
 package aideProjet;
 
 import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -16,18 +18,29 @@ public class GestionFactory {
 	private static HashMap<Integer, Etudiant> intializeListEtudiants() {
 
 		// CrÃ©ation des Ã©tudiants
-		Etudiant etu1 = new Etudiant(0, "Francis", "Brunet-Manquat");
-		Etudiant etu2 = new Etudiant(1, "Philippe", "Martin");
-		Etudiant etu3 = new Etudiant(2, "David", "Cotte");
-		Etudiant etu4 = new Etudiant(3, "Miléna", "Charles");
+		Etudiant kevin = new Etudiant(0, "Kévin", "Coissard");
+		Etudiant elodie = new Etudiant(1, "Elodie", "Goy");
+		Etudiant david = new Etudiant(2, "David", "Cotte");
+		Etudiant milena = new Etudiant(3, "Miléna", "Charles");
+		
+		Etudiant jeremie = new Etudiant(4, "Jérémie", "Guillot");
+		Etudiant martin = new Etudiant(5, "Martin", "Bolot");
+		Etudiant yoann = new Etudiant(6, "Yoann", "Merle");
+		Etudiant jean = new Etudiant(7, "Jean", "Debard");
+		
+		ArrayList<Etudiant> etudiants_aspe = new ArrayList<>(Arrays.asList(jeremie, martin, yoann, jean));
+		ArrayList<Etudiant> etudiants_simo = new ArrayList<>(Arrays.asList(kevin, elodie, david, milena));
+		
+		Formation simo = new Formation(0, "SIMO", etudiants_simo);
+		Formation aspe = new Formation(1, "ASPE", etudiants_aspe);
 
 		// CrÃ©ation du hasmap (association clÃ©/valeur)
 		// Association id -> etudiant
 		HashMap<Integer, Etudiant> listEtudiantsTemp = new HashMap<>();
-		listEtudiantsTemp.put(etu1.getId(), etu1);
-		listEtudiantsTemp.put(etu2.getId(), etu2);
-		listEtudiantsTemp.put(etu3.getId(), etu3);
-		listEtudiantsTemp.put(etu4.getId(), etu4);
+		listEtudiantsTemp.put(kevin.getId(), kevin);
+		listEtudiantsTemp.put(elodie.getId(), elodie);
+		listEtudiantsTemp.put(yoann.getId(), yoann);
+		listEtudiantsTemp.put(martin.getId(), martin);
 		//
 		return listEtudiantsTemp;
 	}
