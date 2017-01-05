@@ -6,16 +6,18 @@ public class Etudiant {
 	private String prenom;
 	private String nom;
 	private Formation formation;
+	private Integer nbAbsence;
 	
 	public Etudiant() {
 		super();
 	}
 	
-	public Etudiant(Integer id, String prenom, String nom) {
+	public Etudiant(Integer id, String prenom, String nom, Integer nbAbsence) {
 		super();
 		this.id = id;
 		this.prenom = prenom;
 		this.nom = nom;
+		this.nbAbsence = nbAbsence;
 	}
 
 	public Integer getId() {
@@ -49,4 +51,18 @@ public class Etudiant {
 	public void setFormation(Formation formation) {
 		this.formation = formation;
 	}
+	
+	public Integer getNbAbsence() {
+		return nbAbsence;
+	}
+	
+	public void setNbAbsence(Integer new_Nbabsence) {
+		this.nbAbsence = new_Nbabsence;
+	}
+	
+	public void addAbsence(){
+		this.setNbAbsence(this.getNbAbsence() + 1);
+	}
+
+	
 }

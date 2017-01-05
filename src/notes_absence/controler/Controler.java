@@ -64,6 +64,9 @@ public class Controler extends HttpServlet {
 
 			doDetail(request, response);
 
+		} else if (action.equals("/ajoutAbsence")) {
+
+			doAjoutAbsence(request, response);
 		} else {
 			// ROOT PATH :
 			doList(request, response);
@@ -93,13 +96,20 @@ public class Controler extends HttpServlet {
 			throws ServletException, IOException {
 		Etudiant etudiant = new Etudiant();
 		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
-
 		 if (etudiant == null) {
 			 etudiant = new Etudiant();
 			 doList(request, response);
 		 } else {
 			 loadJSP(urlDetail, request, response);
 		 }
+	}
+	
+	private void doAjoutAbsence(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		Etudiant etudiant = new Etudiant();
+		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
+		etudiant.addAbsence();
+		doDetail(request, response);
 	}
 
 	/**

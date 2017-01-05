@@ -1,9 +1,10 @@
 package aideProjet;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.*;
 
-public class Formation {
+public class Formation implements Serializable {
 	
 	private Integer id;
 	private String intitule;

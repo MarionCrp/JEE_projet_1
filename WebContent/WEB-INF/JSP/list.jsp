@@ -46,7 +46,7 @@
 		  <td><%= etu.getPrenom() %></td>
 		  <td><%= etu.getFormation().getIntitule() %></td>
 		  <td>15.5</td>
-		  <td>0</td>
+		  <td><%= etu.getNbAbsence() %></td>
 		  <td>
 		  	<a href="detail?id=<%= etu.getId() %>" class="btn btn-default">
 			  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>

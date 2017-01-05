@@ -31,8 +31,6 @@
 	Etudiant etudiant =  GestionFactory.getEtudiantById(etudiant_id);
 	%>
 	
-	<p><b><%= etudiant.getNom().toUpperCase() %></b> <%= etudiant.getPrenom() %></p>
-	
 	<form class="form-horizontal">
 	  <div class="form-group">
 	    <label for="nom" class="col-sm-2 control-label">Nom</label>
@@ -48,9 +46,22 @@
 	  </div>
 	  
 	  <div class="form-group">
-	    <div class="col-sm-2 control-label">Nombre d'abscence</div>
+	    <div class="col-sm-2 control-label">Formation</div>
 	    <div class="col-sm-10">
-	      <input type="input" class="form-control" id="prenom" placeholder="Prénom" value="<%= etudiant.getPrenom() %>">
+	      <select class="form-control">
+			  <option value="0" <% if(etudiant.getFormation().getId() == 0) { %> selected = "selected"  <% } %> >SIMO</option>
+			  <option value="1" <% if(etudiant.getFormation().getId() == 1) { %> selected = "selected"  <% } %> >ASPE</option>
+		  </select>
+	    </div>
+	  </div>
+	  
+	  <div class="form-group">
+	    <div class="col-sm-2 control-label">Absence</div>
+	    <div class="col-sm-10">
+	      <%= etudiant.getNbAbsence() %>
+	      <a href="ajoutAbsence?id=<%= etudiant.getId() %>" class="btn btn-default">
+		    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+	      </a>
 	    </div>
 	  </div>
 	  
