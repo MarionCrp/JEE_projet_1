@@ -7,7 +7,7 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-<jsp:useBean id="gestion_factory" class="aideProjet.GestionFactory" scope="request"/>
+<jsp:useBean id="etudiants" type="java.util.Collection<aideProjet.Etudiant>" scope="request"/>
 
 <html>
 <head>
@@ -17,10 +17,12 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <title><%= getServletContext().getInitParameter("title")%></title>
 </head>
+
+
 <body>
 
 <%-- Element d'action : jsp:include --%>
-		<jsp:include page="<%= getServletContext().getInitParameter(\"header\")%>" />
+	<jsp:include page="<%= getServletContext().getInitParameter(\"header\")%>" />
 
 
 <ul class="nav nav-tabs"s>
@@ -36,9 +38,9 @@
 	  <th>Moyenne</th>
 	  <th>Abscence</th>
 	</tr>
-	<% for (Etudiant etu : gestion_factory.getEtudiants()) { %>
+	<% for (Etudiant etu : etudiants) { %>
 		<tr>
-		  <td><a href="detail.jsp?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>
+		  <td><a href="detail?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>
 		  <td><%= etu.getPrenom() %></td>
 		  <td>15.5</td>
 		  <td>0</td>

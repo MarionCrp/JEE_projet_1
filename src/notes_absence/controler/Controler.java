@@ -54,13 +54,13 @@ public class Controler extends HttpServlet {
 			action = "/detail";
 			System.out.println("action == null");
 		}
-		System.out.println(action);
 
 		// Exécution action
 		if (action.equals("/list")) {
 			doList(request, response);
 
 		} else if (action.equals("/detail")) {
+
 			doDetail(request, response);
 
 		} else {
@@ -81,8 +81,9 @@ public class Controler extends HttpServlet {
 
 	private void doList(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		Collection<Etudiant> etudiants = GestionFactory.getEtudiants();
+		request.setAttribute("etudiants", etudiants);
 
-		//Collection<Etudiant> etudiants = GestionFactory.getEtudiants();
 		loadJSP(urlList, request, response);
 
 	}
@@ -90,14 +91,15 @@ public class Controler extends HttpServlet {
 	//
 	private void doDetail(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
 		Etudiant etudiant = new Etudiant();
 		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
 
-		/*
-		 * if (etudiant == null) { etudiant = new Etudiant();
-		 * request.getParameter("etudiant", etudiant); }
-		 */
+		 if (etudiant == null) {
+			 etudiant = new Etudiant();
+			 doList(request, response);
+		 } else {
+			 loadJSP(urlDetail, request, response);
+		 }
 	}
 
 	/**
