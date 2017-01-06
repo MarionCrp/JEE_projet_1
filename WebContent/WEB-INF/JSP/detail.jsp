@@ -7,6 +7,9 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
+<jsp:useBean id="etudiant" type="aideProjet.Etudiant" scope="request"/>
+<jsp:useBean id="formations" type="java.util.Collection<aideProjet.Formation>" scope="request"/>
+
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -24,13 +27,6 @@
 	<a href="list" class="btn btn-default">
 		<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
 	</a>
-
-<% 
-	request.getParameter("id");
-	
-	int etudiant_id = Integer.parseInt(request.getParameter("id"));
-	Etudiant etudiant =  GestionFactory.getEtudiantById(etudiant_id);
-	%>
 	
 	<form class="form-horizontal" method="post" action="modifEtudiant">
 	  <input type="hidden" name="id" value="<%= etudiant.getId() %>">
@@ -51,8 +47,9 @@
 	    <div class="col-sm-2 control-label">Formation</div>
 	    <div class="col-sm-10">
 	      <select class="form-control" name="formation">
-			  <option value="0" <% if(etudiant.getFormation().getId() == 0) { %> selected = "selected"  <% } %> >SIMO</option>
-			  <option value="1" <% if(etudiant.getFormation().getId() == 1) { %> selected = "selected"  <% } %> >ASPE</option>
+	      	<% for(Formation formation : formations) { %>
+			  <option value="<%= formation.getId() %>" <% if(etudiant.getFormation().getId() == formation.getId()) { %> selected = "selected"  <% } %> ><%= formation.getIntitule() %></option>
+		  	<% } %>
 		  </select>
 	    </div>
 	  </div>

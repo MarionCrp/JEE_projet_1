@@ -14,7 +14,7 @@ public class Etudiant implements Serializable {
 	private String prenom;
 	@Column
 	private String nom;
-	@Column
+	@Column(nullable = false)
 	private Integer nbAbsence;
 	
 	@ManyToOne
@@ -26,9 +26,8 @@ public class Etudiant implements Serializable {
 		super();
 	}
 	
-	public Etudiant(Integer id, String prenom, String nom, Integer nbAbsence) {
+	public Etudiant(String prenom, String nom, Formation formation) {
 		super();
-		this.id = id;
 		this.prenom = prenom;
 		this.nom = nom;
 		this.nbAbsence = nbAbsence;

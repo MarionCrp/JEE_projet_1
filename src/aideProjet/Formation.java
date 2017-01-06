@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 import java.util.*;
 
+@Entity
 public class Formation implements Serializable {
 	
 	@Id
@@ -15,20 +16,12 @@ public class Formation implements Serializable {
 	private String intitule;
 	
 	@OneToMany(mappedBy="formation", fetch=FetchType.LAZY)
-	ArrayList<Etudiant> etudiants = new ArrayList<Etudiant>();
+	List<Etudiant> etudiants;
 	
 	private static final long serialVersionUID = 1L;
 	
 	public Formation() {
 		super();
-	}
-	
-	public Formation(Integer id, String intitule, ArrayList<Etudiant> etudiants) {
-		super();
-		this.id = id;
-		this.intitule = intitule;
-		this.etudiants = etudiants;
-		inscriptionEtudiants(etudiants);
 	}
 
 	public Integer getId() {
@@ -47,7 +40,7 @@ public class Formation implements Serializable {
 		this.intitule = intitule;
 	}
 
-	public ArrayList getEtudiants() {
+	public List getEtudiants() {
 		return etudiants;
 	}
 

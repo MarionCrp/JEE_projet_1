@@ -6,6 +6,7 @@ import java.util.*;
 
 import aideProjet.*;
 
+import javax.persistence.EntityManager;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,7 +44,8 @@ public class Controler extends HttpServlet {
 		urlDetail = getServletConfig().getInitParameter("urlDetail");
 		urlModifEtudiant = getServletConfig().getInitParameter("urlModifEtudiant");
 		urlMatiere = getServletConfig().getInitParameter("urlMatiere");
-		GestionFactory.open();		
+		GestionFactory.open();
+		generateDataInDb();
 	}
 	
 	@Override
@@ -111,32 +113,46 @@ public class Controler extends HttpServlet {
 
 	private void doList(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		Collection<Etudiant> etudiants = GestionFactory.getEtudiants();
+		EntityManager em = GestionFactory.factory.createEntityManager();
+		em.getTransaction().begin();
+		
+		Collection<Etudiant> etudiants = EtudiantDAO.getAll();
 		request.setAttribute("etudiants", etudiants);
 		loadJSP(urlList, request, response);
-
+		
+		em.close();
 	}
 	
 	private void doMatiere(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		Collection<Etudiant> etudiants = GestionFactory.getEtudiants();
+		EntityManager em = GestionFactory.factory.createEntityManager();
+		em.getTransaction().begin();
+		
+		Collection<Etudiant> etudiants = EtudiantDAO.getAll();
 		request.setAttribute("etudiants", etudiants);
 		loadJSP(urlMatiere, request, response);
-
+		em.close();
 	}
 
 	//
 	private void doDetail(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
+		EntityManager em = GestionFactory.factory.createEntityManager();
+		em.getTransaction().begin();
+
 		Etudiant etudiant = new Etudiant();
-		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
+		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
+		List<Formation> formations = FormationDAO.getAll();
+		request.setAttribute("etudiant", etudiant);
+		request.setAttribute("formations", formations);
 		if (etudiant == null) {
 			 etudiant = new Etudiant();
 			 doList(request, response);
 		 } else {
 			 loadJSP(urlDetail, request, response);
 		 }
+		
+		em.close();
 	}
 	
 	private void doModifEtudiant(HttpServletRequest request, HttpServletResponse response)
@@ -154,8 +170,11 @@ public class Controler extends HttpServlet {
 			throws ServletException, IOException {
 		String referer = request.getHeader("Referer");
 
+		EntityManager em = GestionFactory.factory.createEntityManager();
+		em.getTransaction().begin();
+		
 		Etudiant etudiant = new Etudiant();
-		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
+		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
 		etudiant.addAbsence();
 		if (maSession.getAttribute("previous_page").equals("/matiere")) {
 			doMatiere(request, response);
@@ -164,6 +183,8 @@ public class Controler extends HttpServlet {
 		} else {
 			doList(request, response);
 		}
+		
+		em.close();
 	}
 
 	/**
@@ -197,13 +218,50 @@ public class Controler extends HttpServlet {
 	}
 	
 	private Etudiant setEtudiantParameters(HttpServletRequest request){
+		EntityManager em = GestionFactory.factory.createEntityManager();
+		em.getTransaction().begin();
 		Etudiant etudiant = new Etudiant();
-		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
+		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
 		if(etudiant != null){
 			etudiant.setNom(request.getParameter("nom"));
 			etudiant.setPrenom(request.getParameter("prenom"));
 			//etudiant.setFormation(request.getParameter("formation"));
 		}
+		em.close();
 		return etudiant;
+	}
+	
+	private void generateDataInDb(){
+		EntityManager em = GestionFactory.factory.createEntityManager();
+		em.getTransaction().begin();
+		Formation simo = new Formation();
+		Formation aspe = new Formation();
+		Formation big_data = new Formation();
+		if(FormationDAO.getAll().size() == 0){
+			simo = FormationDAO.create("SIMO");
+			aspe = FormationDAO.create("ASPE");
+			big_data = FormationDAO.create("BIG DATA");
+		} else {
+			simo = FormationDAO.getByIntitule("SIMO");
+			aspe = FormationDAO.getByIntitule("ASPE");
+			big_data = FormationDAO.getByIntitule("BIG DATA");
+		}
+		
+		if(EtudiantDAO.getAll().size() == 0){
+			// CrÃ©ation des Ã©tudiants
+			Etudiant kevin = EtudiantDAO.create("Kévin", "Coissard", simo);
+			Etudiant elodie = EtudiantDAO.create("Elodie", "Goy", simo);
+			Etudiant david = EtudiantDAO.create("David", "Cotte", simo);
+			Etudiant milena = EtudiantDAO.create("Miléna", "Charles", simo);
+			
+			Etudiant jeremie = EtudiantDAO.create("Jérémie", "Guillot", aspe);
+			Etudiant martin = EtudiantDAO.create("Martin", "Bolot", aspe);
+			Etudiant yoann = EtudiantDAO.create("Yoann", "Merle", aspe);
+			Etudiant jean = EtudiantDAO.create("Jean", "Debard", aspe);
+
+			Etudiant amandine = EtudiantDAO.create("Amandine", "Henriet", big_data);
+		}
+		
+		em.close();
 	}
 }
