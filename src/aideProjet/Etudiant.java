@@ -1,12 +1,26 @@
 package aideProjet;
 
-public class Etudiant {
+import java.io.Serializable;
+import javax.persistence.*;
+
+@Entity
+public class Etudiant implements Serializable {
 	
+	@Id
+	@GeneratedValue
 	private Integer id;
+	
+	@Column
 	private String prenom;
+	@Column
 	private String nom;
-	private Formation formation;
+	@Column
 	private Integer nbAbsence;
+	
+	@ManyToOne
+	private Formation formation;
+	
+	private static final long serialVersionUID = 1L;
 	
 	public Etudiant() {
 		super();

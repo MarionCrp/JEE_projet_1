@@ -13,6 +13,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet implementation class Controler
@@ -31,11 +32,26 @@ public class Controler extends HttpServlet {
 
 	private String urlList;
 	private String urlDetail;
+	private String urlModifEtudiant;
+	private String urlMatiere;
+	
+	private HttpSession maSession;
 
 	// INIT
 	public void init() throws ServletException {
 		urlList = getServletConfig().getInitParameter("urlList");
 		urlDetail = getServletConfig().getInitParameter("urlDetail");
+		urlModifEtudiant = getServletConfig().getInitParameter("urlModifEtudiant");
+		urlMatiere = getServletConfig().getInitParameter("urlMatiere");
+		GestionFactory.open();		
+	}
+	
+	@Override
+	public void destroy() {
+		super.destroy();
+
+		// Fermeture de la factory
+		GestionFactory.close();
 	}
 
 	/**
@@ -45,26 +61,36 @@ public class Controler extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		
+		maSession = request.getSession();
 
 		// On récupère la méthode d'envoi de la requête
 		String methode = request.getMethod().toLowerCase();
 
 		// On récupère l'action à exécuter
 		String action = request.getPathInfo();
+		String method = request.getMethod().toLowerCase();
 		if (action == null) {
 			action = "/detail";
-			System.out.println("action == null");
 		}
 
 		// Exécution action
-		if (action.equals("/list")) {
+		if (method.equals("get") && action.equals("/list")) {
+			maSession.setAttribute("previous_page", action);
 			doList(request, response);
 
-		} else if (action.equals("/detail")) {
-
+		} else if (method.equals("get") && action.equals("/detail")) {
+			maSession.setAttribute("previous_page", action);
 			doDetail(request, response);
 
-		} else if (action.equals("/ajoutAbsence")) {
+		} else if (method.equals("post") && action.equals("/modifEtudiant")) {
+			doModifEtudiant(request, response);
+
+		} else if (method.equals("get") && action.equals("/matiere")) {
+			maSession.setAttribute("previous_page", action);
+			doMatiere(request, response);
+
+		} else if (method.equals("get") && action.equals("/ajoutAbsence")) {
 
 			doAjoutAbsence(request, response);
 		} else {
@@ -90,13 +116,22 @@ public class Controler extends HttpServlet {
 		loadJSP(urlList, request, response);
 
 	}
+	
+	private void doMatiere(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		Collection<Etudiant> etudiants = GestionFactory.getEtudiants();
+		request.setAttribute("etudiants", etudiants);
+		loadJSP(urlMatiere, request, response);
+
+	}
 
 	//
 	private void doDetail(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
 		Etudiant etudiant = new Etudiant();
 		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
-		 if (etudiant == null) {
+		if (etudiant == null) {
 			 etudiant = new Etudiant();
 			 doList(request, response);
 		 } else {
@@ -104,12 +139,31 @@ public class Controler extends HttpServlet {
 		 }
 	}
 	
+	private void doModifEtudiant(HttpServletRequest request, HttpServletResponse response)
+		throws ServletException, IOException {
+		Etudiant etudiant = setEtudiantParameters(request);
+		if(etudiant == null){
+			loadJSP(urlList, request, response);
+		} else {
+			loadJSP(urlDetail, request, response);
+		}
+
+	}
+	
 	private void doAjoutAbsence(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String referer = request.getHeader("Referer");
+
 		Etudiant etudiant = new Etudiant();
 		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
 		etudiant.addAbsence();
-		doDetail(request, response);
+		if (maSession.getAttribute("previous_page").equals("/matiere")) {
+			doMatiere(request, response);
+		} else if (maSession.getAttribute("previous_page").equals("/detail")) {
+			doDetail(request, response);
+		} else {
+			doList(request, response);
+		}
 	}
 
 	/**
@@ -140,5 +194,16 @@ public class Controler extends HttpServlet {
 
 		//rheader.include(request, response);
 		rd.forward(request, response);
+	}
+	
+	private Etudiant setEtudiantParameters(HttpServletRequest request){
+		Etudiant etudiant = new Etudiant();
+		etudiant = GestionFactory.getEtudiantById(Integer.parseInt(request.getParameter("id")));
+		if(etudiant != null){
+			etudiant.setNom(request.getParameter("nom"));
+			etudiant.setPrenom(request.getParameter("prenom"));
+			//etudiant.setFormation(request.getParameter("formation"));
+		}
+		return etudiant;
 	}
 }

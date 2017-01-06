@@ -2,13 +2,22 @@ package aideProjet;
 
 import java.util.ArrayList;
 import java.io.Serializable;
+import javax.persistence.*;
 import java.util.*;
 
 public class Formation implements Serializable {
 	
+	@Id
+	@GeneratedValue
 	private Integer id;
+	
+	@Column
 	private String intitule;
+	
+	@OneToMany(mappedBy="formation", fetch=FetchType.LAZY)
 	ArrayList<Etudiant> etudiants = new ArrayList<Etudiant>();
+	
+	private static final long serialVersionUID = 1L;
 	
 	public Formation() {
 		super();

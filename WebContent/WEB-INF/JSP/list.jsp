@@ -26,35 +26,38 @@
 
 
 <ul class="nav nav-tabs"s>
-  <li role="presentation" class="active"><a href="#">Home</a></li>
-  <li role="presentation"><a href="#">Profile</a></li>
-  <li role="presentation"><a href="#">Messages</a></li>
+  <li role="presentation" class="active"><a href="#">Etudiant</a></li>
+  <li role="presentation"><a href="matiere">Matière</a></li>
 </ul>
-
-<table class="table table-bordered table-striped">
-	<tr>
-	  <th>Nom</th>
-	  <th>Prénom</th>
-	  <th>Formation</th>
-	  <th>Moyenne</th>
-	  <th>Abscence</th>
-	  <th></th>
-	</tr>
-	<% for (Etudiant etu : etudiants) { %>
+<form action="post">
+	<table class="table table-bordered table-striped">
 		<tr>
-		  <td><a href="detail?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>
-		  <td><%= etu.getPrenom() %></td>
-		  <td><%= etu.getFormation().getIntitule() %></td>
-		  <td>15.5</td>
-		  <td><%= etu.getNbAbsence() %></td>
-		  <td>
-		  	<a href="detail?id=<%= etu.getId() %>" class="btn btn-default">
-			  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-			</a>
+		  <th>Nom</th>
+		  <th>Prénom</th>
+		  <th>Formation</th>
+		  <th>Moyenne</th>
+		  <th>Abscence</th>
+		  <th></th>
 		</tr>
-		<%
-	} %>
-</table>
+		<% for (Etudiant etu : etudiants) { %>
+			<tr>
+			  <td><a href="detail?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>
+			  <td><%= etu.getPrenom() %></td>
+			  <td><%= etu.getFormation().getIntitule() %></td>
+			  <td>15.5</td>
+			  <td><%= etu.getNbAbsence() %>
+	  		  <a href="ajoutAbsence?id=<%= etu.getId() %>" class="btn btn-default">
+			    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+		      </a></td>
+			  <td>
+			  	<a href="detail?id=<%= etu.getId() %>" class="btn btn-default">
+				  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+				</a>
+			</tr>
+			<%
+		} %>
+	</table>
+</form>
 
 <jsp:include page="<%= getServletContext().getInitParameter(\"footer\") %>"/>
 </body>

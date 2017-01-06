@@ -26,29 +26,31 @@
 	</a>
 
 <% 
-	request.getParameter("id"); 
+	request.getParameter("id");
+	
 	int etudiant_id = Integer.parseInt(request.getParameter("id"));
 	Etudiant etudiant =  GestionFactory.getEtudiantById(etudiant_id);
 	%>
 	
-	<form class="form-horizontal">
+	<form class="form-horizontal" method="post" action="modifEtudiant">
+	  <input type="hidden" name="id" value="<%= etudiant.getId() %>">
 	  <div class="form-group">
 	    <label for="nom" class="col-sm-2 control-label">Nom</label>
 	    <div class="col-sm-10">
-	      <input type="input" class="form-control" id="nom" placeholder="Nom" value="<%= etudiant.getNom() %>">
+	      <input type="input" class="form-control" name="nom" id="nom" placeholder="Nom" value="<%= etudiant.getNom() %>">
 	    </div>
 	  </div>
 	  <div class="form-group">
 	    <label for="prenom" class="col-sm-2 control-label">Prénom</label>
 	    <div class="col-sm-10">
-	      <input type="input" class="form-control" id="prenom" placeholder="Prénom" value="<%= etudiant.getPrenom() %>">
+	      <input type="input" class="form-control" name="prenom" id="prenom" placeholder="Prénom" value="<%= etudiant.getPrenom() %>">
 	    </div>
 	  </div>
 	  
 	  <div class="form-group">
 	    <div class="col-sm-2 control-label">Formation</div>
 	    <div class="col-sm-10">
-	      <select class="form-control">
+	      <select class="form-control" name="formation">
 			  <option value="0" <% if(etudiant.getFormation().getId() == 0) { %> selected = "selected"  <% } %> >SIMO</option>
 			  <option value="1" <% if(etudiant.getFormation().getId() == 1) { %> selected = "selected"  <% } %> >ASPE</option>
 		  </select>
@@ -67,10 +69,19 @@
 	  
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-10">
-	      <button type="submit" class="btn btn-default">Sign in</button>
+	      <button type="submit" class="btn btn-default">Modifier</button>
 	    </div>
 	  </div>
 	</form>
+	
+	<table class="table table-bordered table-striped">
+	<tr>
+	  <th>Matière</th>
+	  <th>Coefficient</th>
+	  <th>Note</th>
+	  <th></th>
+	</tr>
+
 
 </body>
 </html>

@@ -33,6 +33,10 @@
 			<param-name>urlDetail</param-name>
 			<param-value>/WEB-INF/JSP/detail.jsp</param-value>
 		</init-param>
+		<init-param>
+			<param-name>urlMatiere</param-name>
+			<param-value>/WEB-INF/JSP/matiere.jsp</param-value>
+		</init-param>
 	</servlet>
 
 	<!-- Mapping URL/Servlet -->
