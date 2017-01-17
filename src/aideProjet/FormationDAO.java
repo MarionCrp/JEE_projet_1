@@ -53,7 +53,16 @@ public class FormationDAO {
 		return deletedCount;
 	}
 	
-	
+	public static Formation getById(int id){
+		// Creation de l'entity manager
+		EntityManager em = GestionFactory.factory.createEntityManager();
+		
+		Formation formation = em.find(Formation.class, id);
+		
+		em.close();
+		
+		return formation;
+	}
 	
 	public static Formation getByIntitule(String intitule) {
 
@@ -91,7 +100,6 @@ public class FormationDAO {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
 		cq.select(cb.count(cq.from(Formation.class)));
-		System.out.println(em.createQuery(cq).getSingleResult());
 		return em.createQuery(cq).getSingleResult();
 	}
 }

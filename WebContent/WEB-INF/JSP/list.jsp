@@ -8,6 +8,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
 <jsp:useBean id="etudiants" type="java.util.Collection<aideProjet.Etudiant>" scope="request"/>
+<jsp:useBean id="formations" type="java.util.List<aideProjet.Formation>" scope="request"/>
 
 <html>
 <head>
@@ -29,26 +30,36 @@
   <li role="presentation" class="active"><a href="#">Etudiant</a></li>
   <li role="presentation"><a href="matiere">Matière</a></li>
 </ul>
-<form action="post">
+
+<form method="get" action="getList">
+	<select class="form-control" name="formation">
+		<option value="all" <% if(request.getParameter("formation") == "all"){ %> selected = "selected" <% } %>> Tous les étudiants </option>
+     	<% for(Formation form : formations) { %>
+	 	 <option value="<%= form.getId() %>" <% if(Integer.parseInt(request.getParameter("formation")) == form.getId()) { %> selected = "selected"  <% } %> ><%= form.getIntitule() %></option>
+  		<% } %>
+  </select>
+</form>
+
+<form method="post" action="modifList">
 	<table class="table table-bordered table-striped">
 		<tr>
 		  <th>Nom</th>
 		  <th>Prénom</th>
 		  <th>Formation</th>
 		  <th>Moyenne</th>
-		  <th>Abscence</th>
+		  <th>Absence</th>
 		  <th></th>
 		</tr>
-		<% for (Etudiant etu : etudiants) { %>
+		<% for (Etudiant etu : etudiants) { %> 
 			<tr>
+			  <input type="hidden" name="id" value=<%= etu.getId() %>>
 			  <td><a href="detail?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>
 			  <td><%= etu.getPrenom() %></td>
 			  <td><%= etu.getFormation().getIntitule() %></td>
 			  <td>15.5</td>
-			  <td><%= etu.getNbAbsence() %>
-	  		  <a href="ajoutAbsence?id=<%= etu.getId() %>" class="btn btn-default">
-			    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-		      </a></td>
+			  <td>
+			  	<input type="number" id="absence[<%= etu.getId() %>]" name="absence[<%= etu.getId() %>]" value="<%= etu.getNbAbsence() %>" placeholder="0">
+			  </td>
 			  <td>
 			  	<a href="detail?id=<%= etu.getId() %>" class="btn btn-default">
 				  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
@@ -57,6 +68,7 @@
 			<%
 		} %>
 	</table>
+	<input type="submit" id="envoyer" name="envoyer" value="Modifier">
 </form>
 
 <jsp:include page="<%= getServletContext().getInitParameter(\"footer\") %>"/>

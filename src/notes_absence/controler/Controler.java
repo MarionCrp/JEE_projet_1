@@ -34,6 +34,7 @@ public class Controler extends HttpServlet {
 	private String urlList;
 	private String urlDetail;
 	private String urlModifEtudiant;
+	private String urlModifList;
 	private String urlMatiere;
 	
 	private HttpSession maSession;
@@ -43,7 +44,9 @@ public class Controler extends HttpServlet {
 		urlList = getServletConfig().getInitParameter("urlList");
 		urlDetail = getServletConfig().getInitParameter("urlDetail");
 		urlModifEtudiant = getServletConfig().getInitParameter("urlModifEtudiant");
+		urlModifList = getServletConfig().getInitParameter("urlModifList");
 		urlMatiere = getServletConfig().getInitParameter("urlMatiere");
+
 		GestionFactory.open();
 		generateDataInDb();
 	}
@@ -88,6 +91,9 @@ public class Controler extends HttpServlet {
 		} else if (method.equals("post") && action.equals("/modifEtudiant")) {
 			doModifEtudiant(request, response);
 
+		} else if (method.equals("post") && action.equals("/modifList")) {
+			doModifList(request, response);
+
 		} else if (method.equals("get") && action.equals("/matiere")) {
 			maSession.setAttribute("previous_page", action);
 			doMatiere(request, response);
@@ -117,7 +123,11 @@ public class Controler extends HttpServlet {
 		em.getTransaction().begin();
 		
 		Collection<Etudiant> etudiants = EtudiantDAO.getAll();
+		List<Formation> formations = FormationDAO.getAll();
+		
+		request.setAttribute("formations", formations);
 		request.setAttribute("etudiants", etudiants);
+
 		loadJSP(urlList, request, response);
 		
 		em.close();
@@ -157,21 +167,41 @@ public class Controler extends HttpServlet {
 	
 	private void doModifEtudiant(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
-		Etudiant etudiant = setEtudiantParameters(request);
-		if(etudiant == null){
-			loadJSP(urlList, request, response);
+		
+		// On récupère l'étudiant en base de donnée.
+		Etudiant new_etu = updateEtudiant(request, Integer.parseInt(request.getParameter("id")));
+		if(new_etu == null){
+			doList(request, response);
 		} else {
-			loadJSP(urlDetail, request, response);
+			doDetail(request, response);
+		}
+	}
+	
+	private void doModifList(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		
+		// On récupère l'étudiant en base de donnée.
+		String[] ids = request.getParameterValues("id");
+		for(String id : ids){
+			Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
 		}
 
-	}
+		/*for(String string_id : ids){
+			int id = Integer.parseInt(string_id);
+			System.out.println(id);
+			//Etudiant etu = updateEtudiant(request, id);
+		}*/
+		
+		doList(request, response);
+
+		}
 	
 	private void doAjoutAbsence(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String referer = request.getHeader("Referer");
 
 		EntityManager em = GestionFactory.factory.createEntityManager();
-		em.getTransaction().begin();
+		em.getTransaction().begin();	
 		
 		Etudiant etudiant = new Etudiant();
 		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
@@ -217,18 +247,27 @@ public class Controler extends HttpServlet {
 		rd.forward(request, response);
 	}
 	
-	private Etudiant setEtudiantParameters(HttpServletRequest request){
-		EntityManager em = GestionFactory.factory.createEntityManager();
-		em.getTransaction().begin();
-		Etudiant etudiant = new Etudiant();
-		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
-		if(etudiant != null){
+	private Etudiant updateEtudiant( HttpServletRequest request, int id){
+		Etudiant etudiant = EtudiantDAO.retrieveById(id);
+		// On affecte les données envoyées par le formulaire à l'étudiant
+		System.out.println(request.getParameter("nom"));
+		if(request.getParameter("nom") != null){
 			etudiant.setNom(request.getParameter("nom"));
-			etudiant.setPrenom(request.getParameter("prenom"));
-			//etudiant.setFormation(request.getParameter("formation"));
 		}
-		em.close();
-		return etudiant;
+		if(request.getParameter("prenom") != null){
+			etudiant.setPrenom(request.getParameter("prenom"));
+		}
+		if(request.getParameter("formation") != null){
+			Formation formation = FormationDAO.getById(Integer.parseInt(request.getParameter("formation")));
+			etudiant.setFormation(formation);
+		}
+		if(request.getParameter("absence[" + id + "]") != null){
+			int nb_absence = Integer.parseInt(request.getParameter("absence[" + id + "]"));
+			etudiant.setNbAbsence(nb_absence);
+		}
+		
+		// On modifie l'étudiant en base de données.
+		return EtudiantDAO.update(etudiant);
 	}
 	
 	private void generateDataInDb(){
