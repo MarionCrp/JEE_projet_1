@@ -122,11 +122,34 @@ public class Controler extends HttpServlet {
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
 		
-		Collection<Etudiant> etudiants = EtudiantDAO.getAll();
+		Collection<Etudiant> etudiants;
+		
+		String formation_param = request.getParameter("formation");
+		/*if( formation_param == null || formation_param.isEmpty()){
+			etudiants = EtudiantDAO.getAll();
+		} else {
+			Formation choosen_formation = FormationDAO.getById(Integer.parseInt(formation_param));
+			if(choosen_formation == null) etudiants = EtudiantDAO.getAll();
+			else{
+				etudiants = choosen_formation.getEtudiants();
+			}
+		}*/
+		etudiants = EtudiantDAO.getAll();
+
 		List<Formation> formations = FormationDAO.getAll();
 		
+		// Si une formation est choisie on l'affecte en tant que paramètre de requête. Sinon on lui met comme valeur -1.
+		Integer choosen_formation_id;
+		if(request.getParameterMap().containsKey("formation")){
+			choosen_formation_id = Integer.parseInt(request.getParameter("formation"));
+		} else {
+			choosen_formation_id = -1;
+		}
+		
+		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("formations", formations);
 		request.setAttribute("etudiants", etudiants);
+		
 
 		loadJSP(urlList, request, response);
 		
@@ -186,14 +209,8 @@ public class Controler extends HttpServlet {
 			Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
 		}
 
-		/*for(String string_id : ids){
-			int id = Integer.parseInt(string_id);
-			System.out.println(id);
-			//Etudiant etu = updateEtudiant(request, id);
-		}*/
-		
 		doList(request, response);
-
+		
 		}
 	
 	private void doAjoutAbsence(HttpServletRequest request, HttpServletResponse response)

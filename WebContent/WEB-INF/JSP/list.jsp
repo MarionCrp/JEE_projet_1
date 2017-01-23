@@ -9,6 +9,7 @@
 
 <jsp:useBean id="etudiants" type="java.util.Collection<aideProjet.Etudiant>" scope="request"/>
 <jsp:useBean id="formations" type="java.util.List<aideProjet.Formation>" scope="request"/>
+<jsp:useBean id="choosen_formation_id" type="java.lang.Integer" scope="request"/>
 
 <html>
 <head>
@@ -31,13 +32,21 @@
   <li role="presentation"><a href="matiere">Matière</a></li>
 </ul>
 
-<form method="get" action="getList">
-	<select class="form-control" name="formation">
-		<option value="all" <% if(request.getParameter("formation") == "all"){ %> selected = "selected" <% } %>> Tous les étudiants </option>
-     	<% for(Formation form : formations) { %>
-	 	 <option value="<%= form.getId() %>" <% if(Integer.parseInt(request.getParameter("formation")) == form.getId()) { %> selected = "selected"  <% } %> ><%= form.getIntitule() %></option>
-  		<% } %>
-  </select>
+<form method="get" action="list">
+	<div class="form-group">
+	    <div class="col-sm-2 control-label">Formation</div>
+	    <div class="col-sm-8">
+	      <select class="form-control" name="formation">
+	      	<% for(Formation formation : formations) { %>
+			  <option value="<%= formation.getId() %>" <% 
+			  if(choosen_formation_id == formation.getId()) { %> selected = "selected"  <% } %> ><%= formation.getIntitule() %></option>
+		  	<% } %>
+		  </select>
+	    </div>
+	    <div class="col-sm-2">
+			<input type="submit" value="Valider">
+		</div>
+	  </div>
 </form>
 
 <form method="post" action="modifList">
