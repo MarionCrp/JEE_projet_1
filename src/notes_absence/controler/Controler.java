@@ -122,35 +122,37 @@ public class Controler extends HttpServlet {
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
 		
-		Collection<Etudiant> etudiants;
-		
-		String formation_param = request.getParameter("formation");
-		/*if( formation_param == null || formation_param.isEmpty()){
-			etudiants = EtudiantDAO.getAll();
-		} else {
-			Formation choosen_formation = FormationDAO.getById(Integer.parseInt(formation_param));
-			if(choosen_formation == null) etudiants = EtudiantDAO.getAll();
-			else{
-				etudiants = choosen_formation.getEtudiants();
-			}
-		}*/
-		etudiants = EtudiantDAO.getAll();
-
 		List<Formation> formations = FormationDAO.getAll();
 		
 		// Si une formation est choisie on l'affecte en tant que paramètre de requête. Sinon on lui met comme valeur -1.
 		Integer choosen_formation_id;
+		
 		if(request.getParameterMap().containsKey("formation")){
-			choosen_formation_id = Integer.parseInt(request.getParameter("formation"));
+			try {
+				choosen_formation_id = Integer.parseInt(request.getParameter("formation"));
+		    } catch (NumberFormatException ex) {
+		    	choosen_formation_id = -1;
+		    }
 		} else {
 			choosen_formation_id = -1;
+		}
+		
+		Collection<Etudiant> etudiants;
+		
+		if( choosen_formation_id == -1){
+			etudiants = EtudiantDAO.getAll();
+		} else {
+			Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
+			if(choosen_formation == null) etudiants = EtudiantDAO.getAll();
+			else{
+				etudiants = choosen_formation.getEtudiants();
+			}
 		}
 		
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("formations", formations);
 		request.setAttribute("etudiants", etudiants);
 		
-
 		loadJSP(urlList, request, response);
 		
 		em.close();
@@ -316,7 +318,24 @@ public class Controler extends HttpServlet {
 			Etudiant jean = EtudiantDAO.create("Jean", "Debard", aspe);
 
 			Etudiant amandine = EtudiantDAO.create("Amandine", "Henriet", big_data);
+			
+			if(MatiereDAO.getAll().size() == 0){
+				//Création des Matiere
+				Matiere mat1 = MatiereDAO.create("SIMO-MI1-PROJET");
+				Matiere mat2 = MatiereDAO.create("SIMO-MI1-DS");
+				Matiere mat3 = MatiereDAO.create("SIGD-MI4-PROJET");
+				Matiere mat4 = MatiereDAO.create("SIGD-MI4-DS");
+				
+				Coefficient coeff1 = CoefficientDAO.create(mat1, simo, 10);
+				Coefficient coeff3 = CoefficientDAO.create(mat2, simo, 17);
+				Coefficient coeff4 = CoefficientDAO.create(mat3, simo, 14);
+				Coefficient coeff5 = CoefficientDAO.create(mat4, simo, 10);
+				Coefficient coeff6 = CoefficientDAO.create(mat3, big_data, 11);
+				Coefficient coeff7 = CoefficientDAO.create(mat4, big_data, 8);
+			}
 		}
+		
+		
 		
 		em.close();
 	}

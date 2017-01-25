@@ -1,11 +1,26 @@
 package aideProjet;
 
-public class Note {
+import java.io.Serializable;
+
+import javax.persistence.*;
+
+@Entity
+public class Note implements Serializable {
 	
+	@Id
+	@GeneratedValue
 	private Integer id;
-	private Float resultat;
-	private Matiere matiere;
+	
+	@OneToOne
 	private Etudiant etudiant;
+	
+	@OneToOne
+	private Matiere matiere;
+	
+	@Column
+	private float resultat;
+	
+	private static final long serialVersionUID = 1L;
 	
 	public Note() {
 		super();

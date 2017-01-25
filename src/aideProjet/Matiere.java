@@ -1,20 +1,29 @@
 package aideProjet;
 
-public class Matiere {
+import java.io.Serializable;
+
+import javax.persistence.*;
+
+@Entity
+public class Matiere implements Serializable {
 	
+	@Id
+	@GeneratedValue
 	private Integer id;
+	
+	@Column
 	private String intitule;
-	private Integer coefficient;
+
+	
+	private static final long serialVersionUID = 1L;
 	
 	public Matiere() {
 		super();
 	}
 	
-	public Matiere(Integer id, String intitule, Integer coefficient) {
+	public Matiere(String intitule) {
 		super();
-		this.id = id;
 		this.intitule = intitule;
-		this.coefficient = coefficient;
 	}
 
 	public Integer getId() {
@@ -31,13 +40,5 @@ public class Matiere {
 
 	public void setIntitule(String intitule) {
 		this.intitule = intitule;
-	}
-
-	public Integer getCoefficient() {
-		return coefficient;
-	}
-
-	public void setCoefficient(Integer coefficient) {
-		this.coefficient = coefficient;
 	}
 }

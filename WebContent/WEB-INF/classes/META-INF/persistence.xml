@@ -13,7 +13,8 @@
 		<class>aideProjet.Etudiant</class>
 		<class>aideProjet.Formation</class>
 		<class>aideProjet.Matiere</class>
-		
+		<class>aideProjet.Note</class>
+		<class>aideProjet.Coefficient</class>
 		
 		<!-- Propriétés de l'unité de persistence -->
 		<properties>
