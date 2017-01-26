@@ -40,16 +40,13 @@
 		<div class="row">
 		    <div class="col-sm-2 control-label">Formation</div>
 		    <div class="col-sm-8">
-		      <select class="form-control" name="formation">
+		      <select class="form-control select-bar" name="formation">
 		      	<% for(Formation formation : formations) { %>
 				  <option value="<%= formation.getId() %>" <% 
 				  if(choosen_formation_id == formation.getId()) { %> selected = "selected"  <% } %> ><%= formation.getIntitule() %></option>
 			  	<% } %>
 			  </select>
 		    </div>
-		    <div class="col-sm-2">
-				<input type="submit" value="Valider">
-			</div>
 		  </div>
 		 </div>
 </form>
@@ -62,21 +59,22 @@
 				    <div class="col-sm-2 control-label">Matiere</div>
 				    <div class="col-sm-8">
 				      <input type="hidden" name="formation" value="<%= choosen_formation_id %>">
-				      <select class="form-control" name="coefficient">
+				      <select class="form-control select-bar" name="coefficient">
 				      	<% for(Coefficient coeff : coefficients) { %>
 						  <option value="<%= coeff.getId() %>" <% 
 						  if(choosen_coefficient_id == coeff.getId()) { %> selected = "selected"  <% } %> ><%= coeff.getMatiere().getIntitule() %></option>
 					  	<% } %>
 					  </select>
 				    </div>
-				    <div class="col-sm-2">
-						<input type="submit" value="Valider">
-					</div>
 				  </div>
 			  </div>
 		</form>
 	<% } else { %>
-	<p style="color: red;"> Pas de matière enregistrée pour cette formation </p>
+	<div class="alert alert-danger alert-dismissible" role="alert">
+	  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	  <strong> Aucune </strong> matière n'est ajoutée pour cette formation.
+	</div>
+
 	<% }
    } %>
 
@@ -91,7 +89,7 @@
 			      <input type="number" name="coefficient_value" value="<%= coefficient.getValeur() %>">
 			    </div>
 			    <div class="col-sm-2">
-					<input type="submit" name="updateCoefficientValeur" value="Valider">
+					<input type="submit" name="updateCoefficientValeur" value="Modifier">
 				</div>
 			  </div>
 		  </div>
@@ -119,5 +117,17 @@
 <% } %>
 
 <jsp:include page="<%= getServletContext().getInitParameter(\"footer\") %>"/>
+<script type="text/javascript">
+
+	window.addEventListener("load", function() {
+		var selects = document.getElementsByClassName("select-bar");
+		for(i=0; i < selects.length; i++){
+			document.getElementsByClassName("select-bar")[i].addEventListener('change', function(){
+				this.form.submit();
+			});
+		}
+	});
+	
+</script>
 </body>
 </html>
