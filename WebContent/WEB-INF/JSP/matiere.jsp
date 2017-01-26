@@ -55,39 +55,43 @@
 </form>
 
 <% if(choosen_formation_id > -1){ %>
-	<form method="get" action="matiere">
-		<div class="form-group">
-			<div class="row">
-			    <div class="col-sm-2 control-label">Matiere</div>
-			    <div class="col-sm-8">
-			      <input type="hidden" name="formation" value="<%= choosen_formation_id %>">
-			      <select class="form-control" name="coefficient">
-			      	<% for(Coefficient coeff : coefficients) { %>
-					  <option value="<%= coeff.getId() %>" <% 
-					  if(choosen_coefficient_id == coeff.getId()) { %> selected = "selected"  <% } %> ><%= coeff.getMatiere().getIntitule() %></option>
-				  	<% } %>
-				  </select>
-			    </div>
-			    <div class="col-sm-2">
-					<input type="submit" value="Valider">
-				</div>
+	<% if(coefficients.size() > 0){ %>
+		<form method="get" action="matiere">
+			<div class="form-group">
+				<div class="row">
+				    <div class="col-sm-2 control-label">Matiere</div>
+				    <div class="col-sm-8">
+				      <input type="hidden" name="formation" value="<%= choosen_formation_id %>">
+				      <select class="form-control" name="coefficient">
+				      	<% for(Coefficient coeff : coefficients) { %>
+						  <option value="<%= coeff.getId() %>" <% 
+						  if(choosen_coefficient_id == coeff.getId()) { %> selected = "selected"  <% } %> ><%= coeff.getMatiere().getIntitule() %></option>
+					  	<% } %>
+					  </select>
+				    </div>
+				    <div class="col-sm-2">
+						<input type="submit" value="Valider">
+					</div>
+				  </div>
 			  </div>
-		  </div>
-	</form>
-<% } %>
+		</form>
+	<% } else { %>
+	<p style="color: red;"> Pas de matière enregistrée pour cette formation </p>
+	<% }
+   } %>
 
 <% if (choosen_formation_id > -1 && choosen_coefficient_id > -1 && etudiants.size() > 0) { %>
 
-<form method="post" action="matiere">
+<form method="post" action="matiere?formation=<%= choosen_formation_id %>&coefficient=<%= choosen_coefficient_id %>">
 		<div class="form-group">
 			<div class="row">
 			    <div class="col-sm-2 control-label">Coefficient</div>
 			    <div class="col-sm-8">
 			      <input type="hidden" name="coefficient_id" value="<%= coefficient.getId() %>">
-			      <input type="number" name="coefficient_valeur" value="<%= coefficient.getValeur() %>">
+			      <input type="number" name="coefficient_value" value="<%= coefficient.getValeur() %>">
 			    </div>
 			    <div class="col-sm-2">
-					<input type="submit" value="Valider">
+					<input type="submit" name="updateCoefficientValeur" value="Valider">
 				</div>
 			  </div>
 		  </div>

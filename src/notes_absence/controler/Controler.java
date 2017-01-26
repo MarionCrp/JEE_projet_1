@@ -46,7 +46,7 @@ public class Controler extends HttpServlet {
 		urlModifEtudiant = getServletConfig().getInitParameter("urlModifEtudiant");
 		urlModifList = getServletConfig().getInitParameter("urlModifList");
 		urlMatiere = getServletConfig().getInitParameter("urlMatiere");
-
+		
 		GestionFactory.open();
 		generateDataInDb();
 	}
@@ -85,6 +85,9 @@ public class Controler extends HttpServlet {
 			maSession.setAttribute("previous_page", action);
 			doList(request, response);
 
+		} else if (method.equals("post") && action.equals("/modifList")) {
+			doModifList(request, response);
+
 		} else if (method.equals("get") && action.equals("/detail")) {
 			maSession.setAttribute("previous_page", action);
 			doDetail(request, response);
@@ -92,16 +95,12 @@ public class Controler extends HttpServlet {
 		} else if (method.equals("post") && action.equals("/modifEtudiant")) {
 			doModifEtudiant(request, response);
 
-		} else if (method.equals("post") && action.equals("/modifList")) {
-			doModifList(request, response);
-
-		} else if (method.equals("get") && action.equals("/matiere")) {
-			maSession.setAttribute("previous_page", action);
+		} else if (method.equals("get") && action.equals("/ajoutAbsence")) {
+			doAjoutAbsence(request, response);
+			
+		} else if (action.equals("/matiere")) {
 			doMatiere(request, response);
 
-		} else if (method.equals("get") && action.equals("/ajoutAbsence")) {
-
-			doAjoutAbsence(request, response);
 		} else {
 			// ROOT PATH :
 			doList(request, response);
@@ -167,6 +166,21 @@ public class Controler extends HttpServlet {
 	}
 	
 	
+	/******************************************************** MODIF LIST ******************************************************/
+	private void doModifList(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// On récupère l'étudiant en base de donnée.
+		String[] ids = request.getParameterValues("id");
+		for (String id : ids) {
+			Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
+		}
+
+		doList(request, response);
+
+	}
+	
+	
 	/******************************************************** MATIERE ******************************************************/
 
 	private void doMatiere(HttpServletRequest request, HttpServletResponse response)
@@ -174,7 +188,8 @@ public class Controler extends HttpServlet {
 		
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
-
+		
+		/***** Initialisation des variables ****/
 		List<Formation> formations = FormationDAO.getAll();
 		Integer choosen_formation_id;
 		Integer choosen_coefficient_id;
@@ -182,9 +197,8 @@ public class Controler extends HttpServlet {
 		List<Etudiant> etudiants = new ArrayList<Etudiant>();
 		Coefficient coefficient = new Coefficient();
 		
-		// Si une formation est choisie on l'affecte en tant que paramètre de
-		// requête. Sinon on lui met comme valeur -1.
-
+		/***** Teste des données récupérées dans le get *****/
+		// -1 si invalide.
 		if (request.getParameterMap().containsKey("formation")) {
 			try {
 				choosen_formation_id = Integer.parseInt(request.getParameter("formation"));
@@ -194,9 +208,6 @@ public class Controler extends HttpServlet {
 		} else {
 			choosen_formation_id = -1;
 		}
-
-		// Si une matiere est choisie on l'affecte en tant que paramètre de
-		// requête. Sinon on lui met comme valeur -1.
 
 		if (request.getParameterMap().containsKey("coefficient")) {
 			try {
@@ -208,18 +219,23 @@ public class Controler extends HttpServlet {
 			choosen_coefficient_id = -1;
 		}
 		
+		
+		/**** On fait les traitements sur la base de données en fonction des paramètres récupérés */
 		if (choosen_formation_id != -1) {
 			Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
 			if (choosen_formation != null){
 				coefficients = CoefficientDAO.getCoefficientByFormation(choosen_formation);
 				etudiants = choosen_formation.getEtudiants();
-				
-				if(choosen_coefficient_id != -1){
-					coefficient = CoefficientDAO.getById(choosen_coefficient_id);
-					
-				}
+				if(choosen_coefficient_id != -1) coefficient = CoefficientDAO.getById(choosen_coefficient_id);
 			}
 		}
+		
+		if(request.getParameterMap().containsKey("updateCoefficientValeur")){
+			int id = Integer.parseInt(request.getParameter("coefficient_id"));
+			int valeur = Integer.parseInt(request.getParameter("coefficient_value"));
+			coefficient = updateCoefficient(request, id, valeur);
+		}
+		
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("choosen_coefficient_id", choosen_coefficient_id);
 		request.setAttribute("formations", formations);
@@ -231,7 +247,20 @@ public class Controler extends HttpServlet {
 
 		em.close();
 	}
+	
+	/******************************************************** MODIF VALEUR COEFFICIENT ******************************************************/
+	private Coefficient updateCoefficient(HttpServletRequest request, int id, int valeur){
+		// On récupère le coefficient en base de donnée.
+		if( valeur > 0){
+			Coefficient coeff = CoefficientDAO.getById(id);
+			coeff.setValeur(valeur);
+			return CoefficientDAO.update(coeff);
+		} else {
+			return null;
+		}
+	}
 
+	
 	/******************************************************** DETAILS ******************************************************/
 	private void doDetail(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -265,19 +294,7 @@ public class Controler extends HttpServlet {
 			doDetail(request, response);
 		}
 	}
-
-	private void doModifList(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-
-		// On récupère l'étudiant en base de donnée.
-		String[] ids = request.getParameterValues("id");
-		for (String id : ids) {
-			Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
-		}
-
-		doList(request, response);
-
-	}
+	
 
 	/******************************************************** DO AJOUT ABSENCE ******************************************************/
 	private void doAjoutAbsence(HttpServletRequest request, HttpServletResponse response)

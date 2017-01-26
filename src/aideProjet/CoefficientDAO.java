@@ -79,7 +79,6 @@ public class CoefficientDAO {
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		
 		Coefficient coefficient = em.find(Coefficient.class, id);
-		System.out.println(coefficient);
 		em.close();
 		
 		return coefficient;
