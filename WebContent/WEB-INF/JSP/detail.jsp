@@ -56,8 +56,13 @@
 	  
 	  <div class="form-group">
 	    <div class="col-sm-2 control-label">Absence</div>
-	    <div class="col-sm-10">
+	    <div class="col-sm-2">
 	      <input type="number" class="form-control" name="absence" id="absence" placeholder="0" value="<%= etudiant.getNbAbsence() %>">
+	    </div>
+	    <div class="col-sm-2">
+	  	  <a href="ajoutAbsence?id=<%= etudiant.getId() %>" class="btn btn-default">
+	   		 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+   		  </a>
 	    </div>
 	  </div>
 	  

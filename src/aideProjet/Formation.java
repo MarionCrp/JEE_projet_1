@@ -18,6 +18,9 @@ public class Formation implements Serializable {
 	@OneToMany(mappedBy="formation", fetch=FetchType.LAZY)
 	List<Etudiant> etudiants;
 	
+	@OneToMany(mappedBy = "formation")
+	private Set<Coefficient> coefficients = new HashSet<Coefficient>();
+	
 	private static final long serialVersionUID = 1L;
 	
 	public Formation() {

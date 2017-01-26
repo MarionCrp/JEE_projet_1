@@ -11,10 +11,12 @@ public class Coefficient implements Serializable {
 	@GeneratedValue
 	private Integer id;
 	
-	@OneToOne
+	@ManyToOne
+	@JoinColumn(name = "matiere_id")
 	private Matiere matiere;
 	
-	@OneToOne
+	@ManyToOne
+	@JoinColumn(name = "formaton_id")
 	private Formation formation;
 	
 	@Column
@@ -47,6 +49,10 @@ private static final long serialVersionUID = 1L;
 	
 	public void setFormation(Formation formation) {
 		this.formation = formation;
+	}
+	
+	public Matiere getMatiere() {
+		return matiere;
 	}
 
 	public void setMatiere(Matiere matiere) {

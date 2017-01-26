@@ -79,7 +79,7 @@ public class CoefficientDAO {
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		
 		Coefficient coefficient = em.find(Coefficient.class, id);
-		
+		System.out.println(coefficient);
 		em.close();
 		
 		return coefficient;
@@ -97,6 +97,20 @@ public class CoefficientDAO {
 		
 		List<Coefficient> list = q.getResultList();
 		return list.get(0);
+	}
+	
+	public static List<Coefficient> getCoefficientByFormation(Formation formation){
+		// Creation de l'entity manager
+		EntityManager em = GestionFactory.factory.createEntityManager();
+				
+		// Recherche 
+		Query q = em.createQuery("SELECT g FROM Coefficient g WHERE g.formation = :formation")
+				.setParameter("formation", formation);
+		
+		@SuppressWarnings("unchecked")
+
+		List<Coefficient> listCoefficient = q.getResultList();
+		return listCoefficient;
 	}
 	
 	

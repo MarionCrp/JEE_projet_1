@@ -1,6 +1,8 @@
 package aideProjet;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -13,7 +15,9 @@ public class Matiere implements Serializable {
 	
 	@Column
 	private String intitule;
-
+	
+	@OneToMany(mappedBy = "matiere")
+	private Set<Coefficient> coefficients = new HashSet<Coefficient>();
 	
 	private static final long serialVersionUID = 1L;
 	
