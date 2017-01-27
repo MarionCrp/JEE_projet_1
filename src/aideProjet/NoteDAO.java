@@ -35,6 +35,23 @@ public class NoteDAO {
 		return note;
 	}
 	
+	public static Note update(Note note) {
+
+		// Creation de l'entity manager
+		EntityManager em = GestionFactory.factory.createEntityManager();
+
+		em.getTransaction().begin();
+
+		em.merge(note);
+
+		// Commit
+		em.getTransaction().commit();
+		// Close the entity manager
+		em.close();
+
+		return note;
+	}
+	
 	
 	public static int removeAll() {
 		
@@ -71,16 +88,19 @@ public class NoteDAO {
 
 		// Creation de l'entity manager
 		EntityManager em = GestionFactory.factory.createEntityManager();
-				
 		// Recherche 
 		Query q = em.createQuery("SELECT f FROM Note f WHERE f.etudiant = :etudiant AND f.matiere = :matiere")
 				.setParameter("etudiant", etudiant)
 				.setParameter("matiere", matiere);
 		
 		List<Note> list = q.getResultList();
+		try{
+			Note note = list.get(0);
+		} catch (Exception ex) {
+			return null;
+		}
 		return list.get(0);
-	}
-	
+	}	
 	
 	public static List<Note> getAll() {
 

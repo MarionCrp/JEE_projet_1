@@ -10,7 +10,7 @@ import javax.persistence.criteria.CriteriaQuery;
 
 public class CoefficientDAO {
 
-	public static Coefficient create(Matiere matiere, Formation formation, int valeur) {
+	public static Coefficient create(Matiere matiere, Formation formation, int valeur, boolean actif) {
 		
 		// Creation de l'entity manager
 		EntityManager em = GestionFactory.factory.createEntityManager();
@@ -23,6 +23,7 @@ public class CoefficientDAO {
 		coefficient.setFormation(formation);
 		coefficient.setMatiere(matiere);
 		coefficient.setValeur(valeur);
+		coefficient.setActif(actif);
 		
 		em.persist(coefficient);
 
@@ -104,6 +105,20 @@ public class CoefficientDAO {
 				
 		// Recherche 
 		Query q = em.createQuery("SELECT g FROM Coefficient g WHERE g.formation = :formation")
+				.setParameter("formation", formation);
+		
+		@SuppressWarnings("unchecked")
+
+		List<Coefficient> listCoefficient = q.getResultList();
+		return listCoefficient;
+	}
+	
+	public static List<Coefficient> getActiveCoefficientByFormation(Formation formation){
+		// Creation de l'entity manager
+		EntityManager em = GestionFactory.factory.createEntityManager();
+				
+		// Recherche 
+		Query q = em.createQuery("SELECT g FROM Coefficient g WHERE g.formation = :formation AND g.actif = true")
 				.setParameter("formation", formation);
 		
 		@SuppressWarnings("unchecked")

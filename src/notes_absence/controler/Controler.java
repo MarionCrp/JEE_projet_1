@@ -1,7 +1,6 @@
 package notes_absence.controler;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.*;
 
 import aideProjet.*;
@@ -143,7 +142,7 @@ public class Controler extends HttpServlet {
 		Formation form = FormationDAO.getById(1);
 		List<Coefficient> coeff = CoefficientDAO.getCoefficientByFormation(form);
 		
-		Collection<Etudiant> etudiants;
+		List<Etudiant> etudiants;
 
 		if (choosen_formation_id == -1) {
 			etudiants = EtudiantDAO.getAll();
@@ -155,7 +154,7 @@ public class Controler extends HttpServlet {
 				etudiants = choosen_formation.getEtudiants();
 			}
 		}
-	
+
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("formations", formations);
 		request.setAttribute("etudiants", etudiants);
@@ -170,7 +169,7 @@ public class Controler extends HttpServlet {
 	private void doModifList(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		// On récupère l'étudiant en base de donnée.
+		// On récupère les ids des étudiants via le post et on les modifie en bouclant sur chacun
 		String[] ids = request.getParameterValues("id");
 		for (String id : ids) {
 			Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
@@ -196,6 +195,7 @@ public class Controler extends HttpServlet {
 		List<Coefficient> coefficients = new ArrayList<Coefficient>();
 		List<Etudiant> etudiants = new ArrayList<Etudiant>();
 		Coefficient coefficient = new Coefficient();
+		HashMap<Etudiant, Float> liste_notes = new HashMap<Etudiant, Float>();
 		
 		/***** Teste des données récupérées dans le get *****/
 		// -1 si invalide.
@@ -219,22 +219,49 @@ public class Controler extends HttpServlet {
 			choosen_coefficient_id = -1;
 		}
 		
+		/***** Modification des notes ****/
+		if(request.getParameterMap().containsKey("updateMatiere")){
+			
+			String[] ids = request.getParameterValues("id");
+			for (String id : ids) {
+				Note note = updateNote(request, Integer.parseInt(id));
+				Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
+			}
+		}
 		
 		/**** On fait les traitements sur la base de données en fonction des paramètres récupérés */
 		if (choosen_formation_id != -1) {
 			Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
 			if (choosen_formation != null){
 				coefficients = CoefficientDAO.getCoefficientByFormation(choosen_formation);
-				etudiants = choosen_formation.getEtudiants();
-				if(choosen_coefficient_id != -1) coefficient = CoefficientDAO.getById(choosen_coefficient_id);
+				etudiants = choosen_formation.getEtudiants();				
+				if(choosen_coefficient_id != -1){
+					coefficient = CoefficientDAO.getById(choosen_coefficient_id);
+					if(coefficient != null){
+						for(Etudiant etudiant : etudiants){
+							Note noteEtudiant = NoteDAO.getByEtudiantAndMatiere(etudiant, coefficient.getMatiere());
+							Float resultat = noteEtudiant == null ? 0 : noteEtudiant.getResultat();
+							liste_notes.put(etudiant, resultat);
+						}
+					}
+				}
 			}
 		}
 		
-		if(request.getParameterMap().containsKey("updateCoefficientValeur")){
+		/**** Modification du coefficient ****/
+		if(request.getParameterMap().containsKey("updateMatiere")){
 			int id = Integer.parseInt(request.getParameter("coefficient_id"));
 			int valeur = Integer.parseInt(request.getParameter("coefficient_value"));
-			coefficient = updateCoefficient(request, id, valeur);
+			boolean actif;
+			if(request.getParameterMap().containsKey("coefficient_active") && request.getParameter("coefficient_active").equals("on")){
+				actif = true;
+			} else {
+				actif = false;
+			}
+			coefficient = updateCoefficient(request, id, valeur, actif);
 		}
+		
+		
 		
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("choosen_coefficient_id", choosen_coefficient_id);
@@ -242,19 +269,46 @@ public class Controler extends HttpServlet {
 		request.setAttribute("coefficients", coefficients);
 		request.setAttribute("coefficient", coefficient);
 		request.setAttribute("etudiants", etudiants);
+		request.setAttribute("liste_notes", liste_notes);
 
 		loadJSP(urlMatiere, request, response);
 
 		em.close();
 	}
 	
-	/******************************************************** MODIF VALEUR COEFFICIENT ******************************************************/
-	private Coefficient updateCoefficient(HttpServletRequest request, int id, int valeur){
+	/******************************************************** UPDATE VALEUR COEFFICIENT ******************************************************/
+	private Coefficient updateCoefficient(HttpServletRequest request, int id, int valeur, boolean actif){
 		// On récupère le coefficient en base de donnée.
 		if( valeur > 0){
 			Coefficient coeff = CoefficientDAO.getById(id);
 			coeff.setValeur(valeur);
+			coeff.setActif(actif);
 			return CoefficientDAO.update(coeff);
+		} else {
+			return null;
+		}
+	}
+	
+	/******************************************************** UPDATE NOTE ******************************************************/
+	private Note updateNote(HttpServletRequest request, int id){
+		
+		// On récupère la valeur de la note et l'étudiant concerné
+		float valeur_note = Float.parseFloat(request.getParameter("note[" + id + "]"));
+		Etudiant etu = EtudiantDAO.retrieveById(id);
+		
+		// On récupère la matière
+		Coefficient coeff = CoefficientDAO.getById(Integer.parseInt(request.getParameter("coefficient")));
+		Matiere mat = coeff.getMatiere();
+		if(mat != null &&  valeur_note >= 0 && valeur_note <= 20){
+			Note note = new Note();
+			note = NoteDAO.getByEtudiantAndMatiere(etu, mat);
+			if(note == null){
+				note = NoteDAO.create(etu, mat, valeur_note);
+				return note;
+			} else {
+				note.setResultat(valeur_note);
+				return NoteDAO.update(note);
+			}
 		} else {
 			return null;
 		}
@@ -413,12 +467,12 @@ public class Controler extends HttpServlet {
 				Matiere mat3 = MatiereDAO.create("SIGD-MI4-PROJET");
 				Matiere mat4 = MatiereDAO.create("SIGD-MI4-DS");
 
-				Coefficient coeff1 = CoefficientDAO.create(mat1, simo, 10);
-				Coefficient coeff3 = CoefficientDAO.create(mat2, simo, 17);
-				Coefficient coeff4 = CoefficientDAO.create(mat3, simo, 14);
-				Coefficient coeff5 = CoefficientDAO.create(mat4, simo, 10);
-				Coefficient coeff6 = CoefficientDAO.create(mat3, big_data, 11);
-				Coefficient coeff7 = CoefficientDAO.create(mat4, big_data, 8);
+				Coefficient coeff1 = CoefficientDAO.create(mat1, simo, 10, false);
+				Coefficient coeff3 = CoefficientDAO.create(mat2, simo, 17, false);
+				Coefficient coeff4 = CoefficientDAO.create(mat3, simo, 14, false);
+				Coefficient coeff5 = CoefficientDAO.create(mat4, simo, 10, false);
+				Coefficient coeff6 = CoefficientDAO.create(mat3, big_data, 11, false);
+				Coefficient coeff7 = CoefficientDAO.create(mat4, big_data, 8, false);
 			}
 		}
 

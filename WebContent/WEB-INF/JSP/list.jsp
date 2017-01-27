@@ -7,7 +7,7 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-<jsp:useBean id="etudiants" type="java.util.Collection<aideProjet.Etudiant>" scope="request"/>
+<jsp:useBean id="etudiants" type="java.util.List<aideProjet.Etudiant>" scope="request"/>
 <jsp:useBean id="formations" type="java.util.List<aideProjet.Formation>" scope="request"/>
 <jsp:useBean id="choosen_formation_id" type="java.lang.Integer" scope="request"/>
 
@@ -65,7 +65,7 @@
 			  <td><a href="detail?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>
 			  <td><%= etu.getPrenom() %></td>
 			  <td><%= etu.getFormation().getIntitule() %></td>
-			  <td>15.5</td>
+			  <td><%= Services.calculeMoyenne(etu) %></td>
 			  <td>
 			  	<input type="number" id="absence[<%= etu.getId() %>]" name="absence[<%= etu.getId() %>]" value="<%= etu.getNbAbsence() %>" placeholder="0">
 			  </td>

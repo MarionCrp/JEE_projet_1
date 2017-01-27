@@ -13,6 +13,7 @@
 <jsp:useBean id="coefficients" type="java.util.List<aideProjet.Coefficient>" scope="request"/>
 <jsp:useBean id="coefficient" type="aideProjet.Coefficient" scope="request"/>
 <jsp:useBean id="choosen_coefficient_id" type="java.lang.Integer" scope="request"/>
+<jsp:useBean id="liste_notes" type="java.util.HashMap" scope="request"/>
 
 <html>
 <head>
@@ -35,12 +36,14 @@
   <li role="presentation" class="active"><a href="#">Matière</a></li>
 </ul>
 
+<!-- SELECT CHOIX FORMATION -->
 <form method="get" action="matiere">
 	<div class="form-group">
 		<div class="row">
 		    <div class="col-sm-2 control-label">Formation</div>
 		    <div class="col-sm-8">
 		      <select class="form-control select-bar" name="formation">
+		     	 <option selected = "selected"> Choisissez une formation </option>
 		      	<% for(Formation formation : formations) { %>
 				  <option value="<%= formation.getId() %>" <% 
 				  if(choosen_formation_id == formation.getId()) { %> selected = "selected"  <% } %> ><%= formation.getIntitule() %></option>
@@ -51,6 +54,7 @@
 		 </div>
 </form>
 
+<!-- SELECT CHOIX MATIERE -->
 <% if(choosen_formation_id > -1){ %>
 	<% if(coefficients.size() > 0){ %>
 		<form method="get" action="matiere">
@@ -60,6 +64,7 @@
 				    <div class="col-sm-8">
 				      <input type="hidden" name="formation" value="<%= choosen_formation_id %>">
 				      <select class="form-control select-bar" name="coefficient">
+				      	<option selected = "selected"> Choisissez une matière </option>
 				      	<% for(Coefficient coeff : coefficients) { %>
 						  <option value="<%= coeff.getId() %>" <% 
 						  if(choosen_coefficient_id == coeff.getId()) { %> selected = "selected"  <% } %> ><%= coeff.getMatiere().getIntitule() %></option>
@@ -78,22 +83,36 @@
 	<% }
    } %>
 
+
+<!-- FORMULAIRE UPDATE VALEUR DU COEFFICIENT ET S'IL EST ACTIF (se calcule dans la moyenne) -->
+
 <% if (choosen_formation_id > -1 && choosen_coefficient_id > -1 && etudiants.size() > 0) { %>
 
 <form method="post" action="matiere?formation=<%= choosen_formation_id %>&coefficient=<%= choosen_coefficient_id %>">
-		<div class="form-group">
-			<div class="row">
-			    <div class="col-sm-2 control-label">Coefficient</div>
-			    <div class="col-sm-8">
-			      <input type="hidden" name="coefficient_id" value="<%= coefficient.getId() %>">
-			      <input type="number" name="coefficient_value" value="<%= coefficient.getValeur() %>">
-			    </div>
-			    <div class="col-sm-2">
-					<input type="submit" name="updateCoefficientValeur" value="Modifier">
-				</div>
-			  </div>
+    <input type="hidden" name="coefficient_id" value="<%= coefficient.getId() %>">
+	<div class="form-group">
+		<div class="row">
+		    <div class="col-sm-2 control-label">Coefficient</div>
+		    <div class="col-sm-8">
+
+		      <input type="number" name="coefficient_value" value="<%= coefficient.getValeur() %>" class="form-control">
+		    </div>
 		  </div>
-	</form>
+	  </div>
+	  <div class="form-group">
+		<div class="row">
+		    <div class="col-sm-2 control-label"></div>
+		    <div class="col-sm-8">
+		      <div class="checkbox">
+			    <label>
+			      <input type="checkbox" name="coefficient_active" <%= coefficient.getActif() == true ? "checked" : "" %>> Activer
+			    </label>
+			  </div>
+		    </div>
+		  </div>
+	  </div>
+	
+<!-- FORMULAIRE UPDATE NOTE ETUDIANT (se calcule dans la moyenne) -->
 	<table class="table table-bordered table-striped">
 		<tr>
 		  <th>Nom</th>
@@ -103,20 +122,26 @@
 		</tr>
 		<% for (Etudiant etu : etudiants) { %>
 			<tr>
+				<input type="hidden" name="id" value=<%= etu.getId() %>>
 			  <td><a href="detail?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>
 			  <td><%= etu.getPrenom() %></td>
 			  <td><%= etu.getFormation().getIntitule() %></td>
 			  <td>
-			  	<input type="number" id="note" name="note" value="" class="form-control">
+			  	<input type="number" id="note[<%= etu.getId() %>]" name="note[<%= etu.getId() %>]" value="<%= liste_notes.get(etu) %>" class="form-control">
 			  </td>
 	
 			</tr>
 			<%
 		} %>
 	</table>
+	<input type="submit" value="Valider les notes" name="updateMatiere">
 <% } %>
 
+
+<!-- FOOTER -->
 <jsp:include page="<%= getServletContext().getInitParameter(\"footer\") %>"/>
+
+<!-- JAVASCRIPT -->
 <script type="text/javascript">
 
 	window.addEventListener("load", function() {

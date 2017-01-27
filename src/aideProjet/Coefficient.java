@@ -22,17 +22,21 @@ public class Coefficient implements Serializable {
 	@Column
 	private Integer valeur;
 	
+	@Column
+	private boolean actif;
+	
 private static final long serialVersionUID = 1L;
 	
 	public Coefficient() {
 		super();
 	}
 	
-	public Coefficient(Matiere matiere, Formation formation, int valeur) {
+	public Coefficient(Matiere matiere, Formation formation, int valeur, boolean actif) {
 		super();
 		this.matiere = matiere;
 		this.formation = formation;
 		this.valeur = valeur;
+		this.actif = actif;
 	}
 
 	public Integer getId() {
@@ -65,5 +69,13 @@ private static final long serialVersionUID = 1L;
 
 	public void setValeur(Integer valeur) {
 		this.valeur = valeur;
+	}
+	
+	public boolean getActif() {
+		return actif;
+	}
+
+	public void setActif(boolean actif) {
+		this.actif = actif;
 	}
 }
