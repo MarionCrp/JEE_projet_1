@@ -70,7 +70,9 @@ public class Etudiant implements Serializable {
 	}
 	
 	public void setNbAbsence(Integer new_Nbabsence) {
-		this.nbAbsence = new_Nbabsence;
+		if(new_Nbabsence >= 0){
+			this.nbAbsence = new_Nbabsence;
+		}
 	}
 	
 	public void addAbsence(){
@@ -78,9 +80,7 @@ public class Etudiant implements Serializable {
 	}
 	
 	public void supprAbsence(){
-		if(this.getNbAbsence() > 0){
-			this.setNbAbsence(this.getNbAbsence() - 1);
-		}
+		this.setNbAbsence(this.getNbAbsence() - 1);
 	}
 	
 	//TODO : A supprimer : Fonction de debugg

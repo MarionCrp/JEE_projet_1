@@ -384,11 +384,14 @@ public class Controler extends HttpServlet {
 			throws ServletException, IOException {
 		
 		// On récupère l'étudiant en base de donnée.
-		Etudiant new_etu = updateEtudiant(request, Integer.parseInt(request.getParameter("id")));
-		if (new_etu == null) {
-			doList(request, response);
-		} else {
+		try {
+			Etudiant new_etu = updateEtudiant(request, Integer.parseInt(request.getParameter("id")));
+			flash_success.addMessage("La fiche de l'élève a été modifiée avec succès");
 			doDetail(request, response);
+			
+		} catch(Exception ex) {
+			flash_error.addMessage("Une erreur est survenue lors de l'édition de la fiche de l'élève");
+			doList(request, response);
 		}
 	}
 	
@@ -472,18 +475,40 @@ public class Controler extends HttpServlet {
 	private Etudiant updateEtudiant(HttpServletRequest request, int id) {
 		Etudiant etudiant = EtudiantDAO.retrieveById(id);
 		// On affecte les données envoyées par le formulaire à l'étudiant
-		if (request.getParameter("nom") != null) {
-			etudiant.setNom(request.getParameter("nom"));
+		if(request.getParameterMap().containsKey("nom")) {
+			if(!request.getParameter("nom").isEmpty()){
+				etudiant.setNom(request.getParameter("nom"));
+			} else {
+				flash_error.addMessage("Le nom ne peut être vide");
+			}
 		}
-		if (request.getParameter("prenom") != null) {
-			etudiant.setPrenom(request.getParameter("prenom"));
+		
+		if(request.getParameterMap().containsKey("prenom")) {
+			if(!request.getParameter("prenom").isEmpty()){
+				etudiant.setPrenom(request.getParameter("prenom"));
+			} else {
+				flash_error.addMessage("Le prénom ne peut être vide");
+			}
 		}
-		if (request.getParameter("absence[" + id + "]") != null) {
-			try{
-				int nb_absence = Integer.parseInt(request.getParameter("absence[" + id + "]"));
-				etudiant.setNbAbsence(nb_absence);
-			} catch(Exception ex){
-				flash_error.addMessage("Erreur survenue lors du changement de note");
+
+		int nb_absence = -1;
+		String[] absences_params = {"absence[" + id + "]", "absence" };
+		for(String absences_param : absences_params){
+			if(request.getParameterMap().containsKey(absences_param)){
+				if(request.getParameter(absences_param).isEmpty()){
+					flash_error.addMessage("Le champs 'absence' ne peut être vide");
+				} else {
+					try {
+						nb_absence = Integer.parseInt(request.getParameter(absences_param));
+						if(nb_absence >= 0){
+							etudiant.setNbAbsence(nb_absence);
+						} else {
+							flash_error.addMessage("Le nombre d'absence ne peut être négatif!");
+						}
+					} catch(Exception ex){
+						flash_error.addMessage("Une erreur est survenue lors de la modification des absences");
+					}
+				}
 			}
 		}
 

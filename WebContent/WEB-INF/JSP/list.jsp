@@ -87,7 +87,7 @@
 
 	window.addEventListener("load", function() {
 		// Suppression de la flash message.
-		setTimeout(fade_out, 2000);
+		setTimeout(fade_out, 4000);
 		function fade_out() {
 		  $("#flash").fadeOut(500);
 		}
