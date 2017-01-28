@@ -28,6 +28,7 @@
 
 	<a href="list?formation=<%= choosen_formation_id  %>" class="btn btn-default">
 		<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+		 Liste Etudiants
 	</a>
 	
 	<form class="form-horizontal" method="post" action="modifEtudiant">

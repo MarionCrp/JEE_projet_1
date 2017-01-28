@@ -27,6 +27,6 @@ public class Services {
 			moyenne = total_point / total_coeff;
 		}
 		em.close();
-		return moyenne;
+		return (float) (Math.round(moyenne*100.0)/100.0);
 	}
 }
