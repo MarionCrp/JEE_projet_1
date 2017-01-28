@@ -70,8 +70,9 @@ public class Controler extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
-
 		maSession = request.getSession();
+		flash_error.destroyAllMessages();
+		flash_success.destroyAllMessages();
 
 		// On récupère la méthode d'envoi de la requête
 		String methode = request.getMethod().toLowerCase();
@@ -136,33 +137,28 @@ public class Controler extends HttpServlet {
 
 		// Si une formation est choisie on l'affecte en tant que paramètre de
 		// requête. Sinon on lui met comme valeur -1.
-		Integer choosen_formation_id;
-
-		if (request.getParameterMap().containsKey("formation")) {
+		Integer choosen_formation_id;		
+		
+		List<Etudiant> etudiants;
+		
+		// On test si le paramètre formation est présent dans l'url (s'il est à -1 c'est que l'utilisateur à choisi "tous les étudiants"))
+		if (request.getParameterMap().containsKey("formation") && !request.getParameter("formation").equals("-1")) {
 			try {
 				choosen_formation_id = Integer.parseInt(request.getParameter("formation"));
-			} catch (NumberFormatException ex) {
+				Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
+				etudiants = choosen_formation.getEtudiants();
+			} catch(Exception ex) {
+				flash_error.addMessage("La formation demandée n'existe pas");
+				etudiants = EtudiantDAO.getAll();
 				choosen_formation_id = -1;
 			}
 		} else {
+			etudiants = EtudiantDAO.getAll();
 			choosen_formation_id = -1;
 		}
 		
 		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
-		
-		
-		List<Etudiant> etudiants;
-		if (choosen_formation_id == -1) {
-			etudiants = EtudiantDAO.getAll();
-		} else {
-			Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
-			if (choosen_formation == null)
-				etudiants = EtudiantDAO.getAll();
-			else {
-				etudiants = choosen_formation.getEtudiants();
-			}
-		}
 		
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("formations", formations);
@@ -185,14 +181,21 @@ public class Controler extends HttpServlet {
 		String[] ids = request.getParameterValues("id");
 		
 		for (String id : ids) {
-			Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
+			try {
+				Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
+			} catch (Exception ex){
+				flash_error.addMessage("Une erreur à été rencontrée lors de l'édition des absences");
+			}
 		}
 		// On retourne la formation choisie si c'est le cas : 
 		if (request.getParameterMap().containsKey("formation") && request.getParameter("formation") != "-1"){
 			request.setAttribute("formation", request.getParameter("formation"));
 		}
+		
+		if(flash_error.hasNoMessage()){
+			flash_success.addMessage("Les absences ont été modifiées avec succès");
+		}
 		doList(request, response);
-
 	}
 	
 	
@@ -402,7 +405,7 @@ public class Controler extends HttpServlet {
 		modifAbsence(request, response, "supprimer");
 	}
 	
-	/************************************************** UPDATE NOMBRE ABSENCE ************************************************/
+	/************************************************** UPDATE NOMBRE ABSENCE VIA BOUTONS + /- ************************************************/
 	private void modifAbsence(HttpServletRequest request, HttpServletResponse response, String modif_type)
 			throws ServletException, IOException {
 		String referer = request.getHeader("Referer");
@@ -477,10 +480,10 @@ public class Controler extends HttpServlet {
 		}
 		if (request.getParameter("absence[" + id + "]") != null) {
 			try{
-			int nb_absence = Integer.parseInt(request.getParameter("absence[" + id + "]"));
-			etudiant.setNbAbsence(nb_absence);
+				int nb_absence = Integer.parseInt(request.getParameter("absence[" + id + "]"));
+				etudiant.setNbAbsence(nb_absence);
 			} catch(Exception ex){
-				System.out.println("Erreur survenu lors du changement de note");
+				flash_error.addMessage("Erreur survenue lors du changement de note");
 			}
 		}
 

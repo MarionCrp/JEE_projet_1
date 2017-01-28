@@ -37,7 +37,7 @@
 	    <div class="col-sm-2 control-label">Formation</div>
 	    <div class="col-sm-8">
 	      <select class="form-control select-bar" name="formation">
-	      <option value="-1" selected = "selecte"> Tous les étudiants </option>
+	      <option value="-1" selected = "selected"> Tous les étudiants </option>
 	      	<% for(Formation formation : formations) { %>
 			  <option value="<%= formation.getId() %>" <% 
 			  if(choosen_formation_id == formation.getId()) { %> selected = "selected"  <% } %> ><%= formation.getIntitule() %></option>
@@ -59,7 +59,6 @@
 		</tr>
 		<% for (Etudiant etu : etudiants) { 
 		
-		etu.display();
 		%> 
 			<tr>
 			  <input type="hidden" name="id" value=<%= etu.getId() %>>

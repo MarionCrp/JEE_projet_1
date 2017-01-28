@@ -25,11 +25,17 @@ public class Flash {
 	
 	public void addMessage(String message){
 		this.messages.add(message);
-		System.out.println("toto "  + message);
-		System.out.println(this.messages.size());
 	}
 	
-	public boolean hasAnyMessage(){
+	public boolean hasAnyMessages(){
 		return !this.getAllMessages().isEmpty();
+	}
+	
+	public boolean hasNoMessage(){
+		return this.getAllMessages().isEmpty();
+	}
+	
+	public void destroyAllMessages(){
+		this.messages.clear();
 	}
 }

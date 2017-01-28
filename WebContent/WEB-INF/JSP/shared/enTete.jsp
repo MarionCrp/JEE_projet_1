@@ -4,11 +4,11 @@
 <jsp:useBean id="flash_success" type="aideProjet.Flash" scope="request"/>
 
 <h2>Notes et Abscence des Etudiants</h2>
-<% if(flash_error.hasAnyMessage()) {  %>
+<% if(flash_error.hasAnyMessages()) {  %>
 	<div id="flash" style="display: display;">
 		<span class="alert alert-danger"> <%= flash_error.getFirstMessage() %> </span>
 	</div>
-<% } else if(flash_success.hasAnyMessage()) {  %>
+<% } else if(flash_success.hasAnyMessages()) {  %>
 	<div id="flash" style="display: display;">
 		<span class="alert alert-success"> <%= flash_success.getFirstMessage() %> </span>
 	</div>
