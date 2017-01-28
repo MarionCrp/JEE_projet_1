@@ -125,7 +125,6 @@ public class Controler extends HttpServlet {
 	private void doList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
-		
 		List<Formation> formations = FormationDAO.getAll();
 
 		// Si une formation est choisie on l'affecte en tant que paramètre de
@@ -148,7 +147,6 @@ public class Controler extends HttpServlet {
 		List<Coefficient> coeff = CoefficientDAO.getCoefficientByFormation(form);
 		
 		List<Etudiant> etudiants;
-
 		if (choosen_formation_id == -1) {
 			etudiants = EtudiantDAO.getAll();
 		} else {
@@ -159,7 +157,6 @@ public class Controler extends HttpServlet {
 				etudiants = choosen_formation.getEtudiants();
 			}
 		}
-
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("formations", formations);
 		request.setAttribute("etudiants", etudiants);
@@ -175,17 +172,16 @@ public class Controler extends HttpServlet {
 			throws ServletException, IOException {
 
 		// On récupère les ids des étudiants via le post et on les modifie en bouclant sur chacun
-		
+
 		String[] ids = request.getParameterValues("id");
+		
 		for (String id : ids) {
 			Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
 		}
-		
 		// On retourne la formation choisie si c'est le cas : 
 		if (request.getParameterMap().containsKey("formation") && request.getParameter("formation") != "-1"){
 			request.setAttribute("formation", request.getParameter("formation"));
 		}
-
 		doList(request, response);
 
 	}
@@ -368,7 +364,7 @@ public class Controler extends HttpServlet {
 	/******************************************************** MODIF ETUDIANT ******************************************************/
 	private void doModifEtudiant(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
+		
 		// On récupère l'étudiant en base de donnée.
 		Etudiant new_etu = updateEtudiant(request, Integer.parseInt(request.getParameter("id")));
 		if (new_etu == null) {
@@ -463,10 +459,6 @@ public class Controler extends HttpServlet {
 		}
 		if (request.getParameter("prenom") != null) {
 			etudiant.setPrenom(request.getParameter("prenom"));
-		}
-		if (request.getParameter("formation") != null) {
-			Formation formation = FormationDAO.getById(Integer.parseInt(request.getParameter("formation")));
-			etudiant.setFormation(formation);
 		}
 		if (request.getParameter("absence[" + id + "]") != null) {
 			int nb_absence = Integer.parseInt(request.getParameter("absence[" + id + "]"));

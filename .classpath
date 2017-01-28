@@ -13,5 +13,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="C:/Users/Marion/workspace/ExamenMI4_2016_2017/WebContent/WEB-INF/lib/eclipselink.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Marion/workspace/ExamenMI4_2016_2017/WebContent/WEB-INF/lib/javax.persistence_2.1.0.v201304241213.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

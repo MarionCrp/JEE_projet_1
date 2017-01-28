@@ -57,7 +57,10 @@
 		  <th>Absence</th>
 		  <th></th>
 		</tr>
-		<% for (Etudiant etu : etudiants) { %> 
+		<% for (Etudiant etu : etudiants) { 
+		
+		etu.display();
+		%> 
 			<tr>
 			  <input type="hidden" name="id" value=<%= etu.getId() %>>
 			  <td><a href="detail?id=<%= etu.getId() %>"><%= etu.getNom() %></a></td>

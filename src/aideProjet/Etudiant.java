@@ -83,4 +83,12 @@ public class Etudiant implements Serializable {
 		}
 	}
 	
+	//TODO : A supprimer : Fonction de debugg
+	public void display(){
+		System.out.println("nom: " + getNom());
+		System.out.println("prenom: " + getPrenom());
+		System.out.println("formaton: " + getFormation().getIntitule());
+		System.out.println("nbAbsence: " + getNbAbsence());
+		System.out.println("moyenne: " + Services.calculeMoyenne(this));
+	}
 }
