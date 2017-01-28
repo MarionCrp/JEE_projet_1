@@ -125,6 +125,7 @@ public class Controler extends HttpServlet {
 	private void doList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
+		
 		List<Formation> formations = FormationDAO.getAll();
 
 		// Si une formation est choisie on l'affecte en tant que paramètre de
@@ -140,11 +141,10 @@ public class Controler extends HttpServlet {
 		} else {
 			choosen_formation_id = -1;
 		}
+		
 		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
-
-		Formation form = FormationDAO.getById(1);
-		List<Coefficient> coeff = CoefficientDAO.getCoefficientByFormation(form);
+		
 		
 		List<Etudiant> etudiants;
 		if (choosen_formation_id == -1) {
@@ -461,8 +461,12 @@ public class Controler extends HttpServlet {
 			etudiant.setPrenom(request.getParameter("prenom"));
 		}
 		if (request.getParameter("absence[" + id + "]") != null) {
+			try{
 			int nb_absence = Integer.parseInt(request.getParameter("absence[" + id + "]"));
 			etudiant.setNbAbsence(nb_absence);
+			} catch(Exception ex){
+				System.out.println("Erreur survenu lors du changement de note");
+			}
 		}
 
 		// On modifie l'étudiant en base de données.

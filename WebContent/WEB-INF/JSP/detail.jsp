@@ -15,7 +15,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/style.css" />
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <title><%= getServletContext().getInitParameter("title")%></title>
@@ -43,17 +45,6 @@
 	    <label for="prenom" class="col-sm-2 control-label">Prénom</label>
 	    <div class="col-sm-10">
 	      <input type="input" class="form-control" name="prenom" id="prenom" placeholder="Prénom" value="<%= etudiant.getPrenom() %>">
-	    </div>
-	  </div>
-	  
-	  <div class="form-group">
-	    <div class="col-sm-2 control-label">Formation</div>
-	    <div class="col-sm-10">
-	      <select class="form-control" name="formation">
-	      	<% for(Formation formation : formations) { %>
-			  <option value="<%= formation.getId() %>" <% if(etudiant.getFormation().getId() == formation.getId()) { %> selected = "selected"  <% } %> ><%= formation.getIntitule() %></option>
-		  	<% } %>
-		  </select>
 	    </div>
 	  </div>
 	  
@@ -86,13 +77,35 @@
 	  <th>Note</th>
 	  <th></th>
 	</tr>
-	<% for(Coefficient coeff : active_coefficients){ %>
-		<tr>
-			<td><a href="matiere?formation=<%= etudiant.getFormation().getId() %>&coefficient=<%= coeff.getId() %>" ><%= coeff.getMatiere().getIntitule() %></a></td>
-			<td><%= coeff.getValeur() %></td>
-			<td><%= NoteDAO.getByEtudiantAndMatiere(etudiant, coeff.getMatiere()).getResultat() %></td>
-		</tr>
+	<% if(active_coefficients.isEmpty()){ %>
+		</table>
+		<div class="alert alert-danger alert-dismissible" role="alert">
+		  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		  <strong> Aucune </strong> note disponible pour l'instant.
+		</div>
+		
+	<% } else { %>
+		
+		<% for(Coefficient coeff : active_coefficients){ %>
+			<tr>
+				<td><a href="matiere?formation=<%= etudiant.getFormation().getId() %>&coefficient=<%= coeff.getId() %>" ><%= coeff.getMatiere().getIntitule() %></a></td>
+				<td><%= coeff.getValeur() %></td>
+				<td><%= NoteDAO.getByEtudiantAndMatiere(etudiant, coeff.getMatiere()).getResultat() %></td>
+			</tr>
+		<% } %>
+	</table>
 	<% } %>
-	
+
+<!-- JAVASCRIPT -->
+<script type="text/javascript">
+
+	window.addEventListener("load", function() {
+		// Suppression de la flash message.
+		setTimeout(fade_out, 2000);
+		function fade_out() {
+		  $("#flash").fadeOut(500);
+		}
+	});
+</script>
 </body>
 </html>

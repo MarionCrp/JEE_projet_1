@@ -14,8 +14,10 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link type="text/css" rel="stylesheet" href="${pageContext.request.contextPath}/style.css" />
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<title><%= getServletContext().getInitParameter("title")%></title>
 </head>
@@ -25,8 +27,7 @@
 
 <%-- Element d'action : jsp:include --%>
 	<jsp:include page="<%= getServletContext().getInitParameter(\"header\")%>" />
-
-
+<p>TOTTOTOTO </p>
 <ul class="nav nav-tabs"s>
   <li role="presentation" class="active"><a href="#">Etudiant</a></li>
   <li role="presentation"><a href="matiere">Matière</a></li>
@@ -87,6 +88,13 @@
 <script type="text/javascript">
 
 	window.addEventListener("load", function() {
+		// Suppression de la flash message.
+		setTimeout(fade_out, 2000);
+		function fade_out() {
+		  $("#flash").fadeOut(500);
+		}
+	
+		// Lors de la selection d'un élément dans un select, on soumet le formulaire.
 		var selects = document.getElementsByClassName("select-bar");
 		for(i=0; i < selects.length; i++){
 			document.getElementsByClassName("select-bar")[i].addEventListener('change', function(){
