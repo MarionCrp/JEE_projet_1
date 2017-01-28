@@ -97,6 +97,9 @@ public class Controler extends HttpServlet {
 		} else if (method.equals("get") && action.equals("/ajoutAbsence")) {
 			doAjoutAbsence(request, response);
 			
+		} else if (method.equals("get") && action.equals("/supprimerAbsence")) {
+			doSupprimerAbsence(request, response);
+			
 		} else if (action.equals("/matiere")) {
 			doMatiere(request, response);
 
@@ -138,6 +141,8 @@ public class Controler extends HttpServlet {
 		} else {
 			choosen_formation_id = -1;
 		}
+		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste.
+		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
 
 		Formation form = FormationDAO.getById(1);
 		List<Coefficient> coeff = CoefficientDAO.getCoefficientByFormation(form);
@@ -267,6 +272,9 @@ public class Controler extends HttpServlet {
 			coefficient = updateCoefficient(request, id, valeur, actif);
 		}
 		
+		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste (si il décide de consulter la fiche de l'élève.
+		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
+		
 		
 		
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
@@ -330,8 +338,23 @@ public class Controler extends HttpServlet {
 		Etudiant etudiant = new Etudiant();
 		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
 		List<Formation> formations = FormationDAO.getAll();
+		
+		
+		String choosen_formation_id = "";
+		if(maSession.getAttribute("choosen_formation_id") != null){
+			choosen_formation_id = maSession.getAttribute("choosen_formation_id").toString();
+		}
+		
+		List<Coefficient> active_coefficients = CoefficientDAO.getActiveCoefficientByFormation(etudiant.getFormation());
+		
+		// Pour rediriger vers la formation choisie sur une page précédente.
+
+		
 		request.setAttribute("etudiant", etudiant);
 		request.setAttribute("formations", formations);
+		request.setAttribute("choosen_formation_id", choosen_formation_id);
+		request.setAttribute("active_coefficients", active_coefficients);
+		
 		if (etudiant == null) {
 			etudiant = new Etudiant();
 			doList(request, response);
@@ -359,6 +382,18 @@ public class Controler extends HttpServlet {
 	/******************************************************** DO AJOUT ABSENCE ******************************************************/
 	private void doAjoutAbsence(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		modifAbsence(request, response, "ajouter");
+	}
+	
+	/******************************************************** DO SUPPRIMER ABSENCE ******************************************************/
+	private void doSupprimerAbsence(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		modifAbsence(request, response, "supprimer");
+	}
+	
+	/************************************************** UPDATE NOMBRE ABSENCE ************************************************/
+	private void modifAbsence(HttpServletRequest request, HttpServletResponse response, String modif_type)
+			throws ServletException, IOException {
 		String referer = request.getHeader("Referer");
 
 		EntityManager em = GestionFactory.factory.createEntityManager();
@@ -366,7 +401,11 @@ public class Controler extends HttpServlet {
 
 		Etudiant etudiant = new Etudiant();
 		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
-		etudiant.addAbsence();
+		if(modif_type.equals("ajouter")){
+			etudiant.addAbsence();
+		} else {
+			etudiant.supprAbsence();
+		}
 
 		EtudiantDAO.update(etudiant);
 
@@ -375,6 +414,9 @@ public class Controler extends HttpServlet {
 		} else if (maSession.getAttribute("previous_page").equals("/detail")) {
 			doDetail(request, response);
 		} else {
+			if (maSession.getAttribute("choosen_formation_id") != ""){
+				request.setAttribute("formation", maSession.getAttribute("choosen_formation_id"));
+			}
 			doList(request, response);
 		}
 

@@ -76,6 +76,11 @@ public class Etudiant implements Serializable {
 	public void addAbsence(){
 		this.setNbAbsence(this.getNbAbsence() + 1);
 	}
-
+	
+	public void supprAbsence(){
+		if(this.getNbAbsence() > 0){
+			this.setNbAbsence(this.getNbAbsence() - 1);
+		}
+	}
 	
 }

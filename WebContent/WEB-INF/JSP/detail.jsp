@@ -9,6 +9,8 @@
 
 <jsp:useBean id="etudiant" type="aideProjet.Etudiant" scope="request"/>
 <jsp:useBean id="formations" type="java.util.Collection<aideProjet.Formation>" scope="request"/>
+<jsp:useBean id="choosen_formation_id" type="java.lang.String" scope="request"/>
+<jsp:useBean id="active_coefficients" type="java.util.List<aideProjet.Coefficient>" scope="request"/>
 
 <html>
 <head>
@@ -24,7 +26,7 @@
 <%-- Element d'action : jsp:include --%>
 	<jsp:include page="<%= getServletContext().getInitParameter(\"header\")%>" />
 
-	<a href="list" class="btn btn-default">
+	<a href="list?formation=<%= choosen_formation_id  %>" class="btn btn-default">
 		<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
 	</a>
 	
@@ -56,10 +58,13 @@
 	  
 	  <div class="form-group">
 	    <div class="col-sm-2 control-label">Absence</div>
-	    <div class="col-sm-2">
+	    <div class="col-sm-1">
 	      <input type="number" class="form-control" name="absence" id="absence" placeholder="0" value="<%= etudiant.getNbAbsence() %>">
 	    </div>
-	    <div class="col-sm-2">
+	    <div class="col-sm-1">
+   	  	  <a href="supprimerAbsence?id=<%= etudiant.getId() %>" class="btn btn-default">
+	   		 <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+   		  </a>
 	  	  <a href="ajoutAbsence?id=<%= etudiant.getId() %>" class="btn btn-default">
 	   		 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
    		  </a>
@@ -80,7 +85,13 @@
 	  <th>Note</th>
 	  <th></th>
 	</tr>
-
-
+	<% for(Coefficient coeff : active_coefficients){ %>
+		<tr>
+			<td><a href="matiere?formation=<%= etudiant.getFormation().getId() %>&coefficient=<%= coeff.getId() %>" ><%= coeff.getMatiere().getIntitule() %></a></td>
+			<td><%= coeff.getValeur() %></td>
+			<td><%= NoteDAO.getByEtudiantAndMatiere(etudiant, coeff.getMatiere()).getResultat() %></td>
+		</tr>
+	<% } %>
+	
 </body>
 </html>
