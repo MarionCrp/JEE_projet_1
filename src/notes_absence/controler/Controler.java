@@ -170,9 +170,15 @@ public class Controler extends HttpServlet {
 			throws ServletException, IOException {
 
 		// On récupère les ids des étudiants via le post et on les modifie en bouclant sur chacun
+		
 		String[] ids = request.getParameterValues("id");
 		for (String id : ids) {
 			Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
+		}
+		
+		// On retourne la formation choisie si c'est le cas : 
+		if (request.getParameterMap().containsKey("formation") && request.getParameter("formation") != "-1"){
+			request.setAttribute("formation", request.getParameter("formation"));
 		}
 
 		doList(request, response);

@@ -36,20 +36,18 @@
 	<div class="form-group">
 	    <div class="col-sm-2 control-label">Formation</div>
 	    <div class="col-sm-8">
-	      <select class="form-control" name="formation">
+	      <select class="form-control select-bar" name="formation">
+	      <option value="-1" selected = "selecte"> Tous les étudiants </option>
 	      	<% for(Formation formation : formations) { %>
 			  <option value="<%= formation.getId() %>" <% 
 			  if(choosen_formation_id == formation.getId()) { %> selected = "selected"  <% } %> ><%= formation.getIntitule() %></option>
 		  	<% } %>
 		  </select>
 	    </div>
-	    <div class="col-sm-2">
-			<input type="submit" value="Valider">
-		</div>
 	  </div>
 </form>
-
 <form method="post" action="modifList">
+	<input type="hidden" name="formation" value="<%= choosen_formation_id %>"%>
 	<table class="table table-bordered table-striped">
 		<tr>
 		  <th>Nom</th>
@@ -82,4 +80,17 @@
 
 <jsp:include page="<%= getServletContext().getInitParameter(\"footer\") %>"/>
 </body>
+<!-- JAVASCRIPT -->
+<script type="text/javascript">
+
+	window.addEventListener("load", function() {
+		var selects = document.getElementsByClassName("select-bar");
+		for(i=0; i < selects.length; i++){
+			document.getElementsByClassName("select-bar")[i].addEventListener('change', function(){
+				this.form.submit();
+			});
+		}
+	});
+	
+</script>
 </html>
