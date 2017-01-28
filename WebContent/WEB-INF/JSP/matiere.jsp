@@ -14,6 +14,8 @@
 <jsp:useBean id="coefficient" type="aideProjet.Coefficient" scope="request"/>
 <jsp:useBean id="choosen_coefficient_id" type="java.lang.Integer" scope="request"/>
 <jsp:useBean id="liste_notes" type="java.util.HashMap" scope="request"/>
+<jsp:useBean id="flash_error" type="aideProjet.Flash" scope="request"/>
+<jsp:useBean id="flash_success" type="aideProjet.Flash" scope="request"/>
 
 <html>
 <head>

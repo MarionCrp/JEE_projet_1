@@ -27,7 +27,6 @@
 
 <%-- Element d'action : jsp:include --%>
 	<jsp:include page="<%= getServletContext().getInitParameter(\"header\")%>" />
-<p>TOTTOTOTO </p>
 <ul class="nav nav-tabs"s>
   <li role="presentation" class="active"><a href="#">Etudiant</a></li>
   <li role="presentation"><a href="matiere">Matière</a></li>

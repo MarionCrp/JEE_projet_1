@@ -15,12 +15,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
 /**
  * Servlet implementation class Controler
  */
 @WebServlet("/Controler")
 public class Controler extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static Flash flash_error = new Flash("danger");
+	private static Flash flash_success = new Flash("success");
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -75,6 +79,7 @@ public class Controler extends HttpServlet {
 		// On récupère l'action à exécuter
 		String action = request.getPathInfo();
 		String method = request.getMethod().toLowerCase();
+		
 		if (action == null) {
 			action = "/detail";
 		}
@@ -125,8 +130,9 @@ public class Controler extends HttpServlet {
 	private void doList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
+	
 		
-		List<Formation> formations = FormationDAO.getAll();
+		List<Formation> formations = FormationDAO.getAll();		
 
 		// Si une formation est choisie on l'affecte en tant que paramètre de
 		// requête. Sinon on lui met comme valeur -1.
@@ -157,10 +163,12 @@ public class Controler extends HttpServlet {
 				etudiants = choosen_formation.getEtudiants();
 			}
 		}
+		
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("formations", formations);
 		request.setAttribute("etudiants", etudiants);
-
+		request.setAttribute("flash_error", flash_error);
+		request.setAttribute("flash_success", flash_success);
 		loadJSP(urlList, request, response);
 
 		em.close();
@@ -170,6 +178,7 @@ public class Controler extends HttpServlet {
 	/******************************************************** MODIF LIST ******************************************************/
 	private void doModifList(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+	
 
 		// On récupère les ids des étudiants via le post et on les modifie en bouclant sur chacun
 
@@ -280,6 +289,8 @@ public class Controler extends HttpServlet {
 		request.setAttribute("coefficient", coefficient);
 		request.setAttribute("etudiants", etudiants);
 		request.setAttribute("liste_notes", liste_notes);
+		request.setAttribute("flash_error", flash_error);
+		request.setAttribute("flash_success", flash_success);
 
 		loadJSP(urlMatiere, request, response);
 
@@ -288,6 +299,8 @@ public class Controler extends HttpServlet {
 	
 	/******************************************************** UPDATE VALEUR COEFFICIENT ******************************************************/
 	private Coefficient updateCoefficient(HttpServletRequest request, int id, int valeur, boolean actif){
+		Flash flash_error = new Flash("danger");
+		Flash flash_success = new Flash("success");
 		// On récupère le coefficient en base de donnée.
 		if( valeur > 0){
 			Coefficient coeff = CoefficientDAO.getById(id);
@@ -350,6 +363,8 @@ public class Controler extends HttpServlet {
 		request.setAttribute("formations", formations);
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("active_coefficients", active_coefficients);
+		request.setAttribute("flash_error", flash_error);
+		request.setAttribute("flash_success", flash_success);
 		
 		if (etudiant == null) {
 			etudiant = new Etudiant();
@@ -475,51 +490,52 @@ public class Controler extends HttpServlet {
 	
 	/******************************************************** GENERATE DATA IN DB ******************************************************/
 	private void generateDataInDb() {
-		EntityManager em = GestionFactory.factory.createEntityManager();
-		em.getTransaction().begin();
-		Formation simo = new Formation();
-		Formation aspe = new Formation();
-		Formation big_data = new Formation();
-		if (FormationDAO.getAll().size() == 0) {
-			simo = FormationDAO.create("SIMO");
-			aspe = FormationDAO.create("ASPE");
-			big_data = FormationDAO.create("BIG DATA");
-		} else {
-			simo = FormationDAO.getByIntitule("SIMO");
-			aspe = FormationDAO.getByIntitule("ASPE");
-			big_data = FormationDAO.getByIntitule("BIG DATA");
-		}
-
-		if (EtudiantDAO.getAll().size() == 0) {
-			// CrÃ©ation des Ã©tudiants
-			Etudiant kevin = EtudiantDAO.create("Kévin", "Coissard", simo);
-			Etudiant elodie = EtudiantDAO.create("Elodie", "Goy", simo);
-			Etudiant david = EtudiantDAO.create("David", "Cotte", simo);
-			Etudiant milena = EtudiantDAO.create("Miléna", "Charles", simo);
-
-			Etudiant jeremie = EtudiantDAO.create("Jérémie", "Guillot", aspe);
-			Etudiant martin = EtudiantDAO.create("Martin", "Bolot", aspe);
-			Etudiant yoann = EtudiantDAO.create("Yoann", "Merle", aspe);
-			Etudiant jean = EtudiantDAO.create("Jean", "Debard", aspe);
-
-			Etudiant amandine = EtudiantDAO.create("Amandine", "Henriet", big_data);
-
-			if (MatiereDAO.getAll().size() == 0) {
-				// Création des Matiere
-				Matiere mat1 = MatiereDAO.create("SIMO-MI1-PROJET");
-				Matiere mat2 = MatiereDAO.create("SIMO-MI1-DS");
-				Matiere mat3 = MatiereDAO.create("SIGD-MI4-PROJET");
-				Matiere mat4 = MatiereDAO.create("SIGD-MI4-DS");
-
-				Coefficient coeff1 = CoefficientDAO.create(mat1, simo, 10, false);
-				Coefficient coeff3 = CoefficientDAO.create(mat2, simo, 17, false);
-				Coefficient coeff4 = CoefficientDAO.create(mat3, simo, 14, false);
-				Coefficient coeff5 = CoefficientDAO.create(mat4, simo, 10, false);
-				Coefficient coeff6 = CoefficientDAO.create(mat3, big_data, 11, false);
-				Coefficient coeff7 = CoefficientDAO.create(mat4, big_data, 8, false);
+			EntityManager em = GestionFactory.factory.createEntityManager();
+			em.getTransaction().begin();
+			Formation simo = new Formation();
+			Formation aspe = new Formation();
+			Formation big_data = new Formation();
+			if (FormationDAO.getAll().size() == 0) {
+				simo = FormationDAO.create("SIMO");
+				aspe = FormationDAO.create("ASPE");
+				big_data = FormationDAO.create("BIG DATA");
+			} else {
+				simo = FormationDAO.getByIntitule("SIMO");
+				aspe = FormationDAO.getByIntitule("ASPE");
+				big_data = FormationDAO.getByIntitule("BIG DATA");
 			}
-		}
+	
+			if (EtudiantDAO.getAll().size() == 0) {
+				// CrÃ©ation des Ã©tudiants
+				Etudiant kevin = EtudiantDAO.create("Kévin", "Coissard", simo);
+				Etudiant elodie = EtudiantDAO.create("Elodie", "Goy", simo);
+				Etudiant david = EtudiantDAO.create("David", "Cotte", simo);
+				Etudiant milena = EtudiantDAO.create("Miléna", "Charles", simo);
+	
+				Etudiant jeremie = EtudiantDAO.create("Jérémie", "Guillot", aspe);
+				Etudiant martin = EtudiantDAO.create("Martin", "Bolot", aspe);
+				Etudiant yoann = EtudiantDAO.create("Yoann", "Merle", aspe);
+				Etudiant jean = EtudiantDAO.create("Jean", "Debard", aspe);
+	
+				Etudiant amandine = EtudiantDAO.create("Amandine", "Henriet", big_data);
+	
+				if (MatiereDAO.getAll().size() == 0) {
+					// Création des Matiere
+					Matiere mat1 = MatiereDAO.create("SIMO-MI1-PROJET");
+					Matiere mat2 = MatiereDAO.create("SIMO-MI1-DS");
+					Matiere mat3 = MatiereDAO.create("SIGD-MI4-PROJET");
+					Matiere mat4 = MatiereDAO.create("SIGD-MI4-DS");
+	
+					Coefficient coeff1 = CoefficientDAO.create(mat1, simo, 10, false);
+					Coefficient coeff3 = CoefficientDAO.create(mat2, simo, 17, false);
+					Coefficient coeff4 = CoefficientDAO.create(mat3, simo, 14, false);
+					Coefficient coeff5 = CoefficientDAO.create(mat4, simo, 10, false);
+					Coefficient coeff6 = CoefficientDAO.create(mat3, big_data, 11, false);
+					Coefficient coeff7 = CoefficientDAO.create(mat4, big_data, 8, false);
+				}
+			}
+	
+			em.close();
 
-		em.close();
 	}
 }
