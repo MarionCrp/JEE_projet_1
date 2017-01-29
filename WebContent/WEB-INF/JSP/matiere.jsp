@@ -138,7 +138,7 @@
 			<%
 		} %>
 	</table>
-	<input type="submit" value="Valider les notes" name="updateMatiere">
+	<input type="submit" value="Valider" name="updateMatiere">
 <% } %>
 
 

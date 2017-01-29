@@ -68,7 +68,10 @@ private static final long serialVersionUID = 1L;
 	}
 
 	public void setValeur(Integer valeur) {
-		this.valeur = valeur;
+		if(valeur > 0){
+			this.valeur = valeur;
+		}
+		
 	}
 	
 	public boolean getActif() {

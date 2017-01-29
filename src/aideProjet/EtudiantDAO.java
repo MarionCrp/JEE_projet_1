@@ -18,7 +18,6 @@ public class EtudiantDAO {
 
 		//
 		Etudiant etu = em.find(Etudiant.class, id);
-
 	    // Close the entity manager
 	    em.close();
 

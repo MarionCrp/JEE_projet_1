@@ -222,6 +222,7 @@ public class Controler extends HttpServlet {
 			try {
 				choosen_formation_id = Integer.parseInt(request.getParameter("formation"));
 			} catch (NumberFormatException ex) {
+				flash_error.addMessage("La formation demandée n'a pas été trouvée");
 				choosen_formation_id = -1;
 			}
 		} else {
@@ -232,6 +233,7 @@ public class Controler extends HttpServlet {
 			try {
 				choosen_coefficient_id = Integer.parseInt(request.getParameter("coefficient"));
 			} catch (NumberFormatException ex) {
+				flash_error.addMessage("La matière demandée n'a pas été trouvée");
 				choosen_coefficient_id = -1;
 			}
 		} else {
@@ -240,7 +242,6 @@ public class Controler extends HttpServlet {
 		
 		/***** Modification des notes ****/
 		if(request.getParameterMap().containsKey("updateMatiere")){
-			
 			String[] ids = request.getParameterValues("id");
 			for (String id : ids) {
 				Note note = updateNote(request, Integer.parseInt(id));
@@ -251,12 +252,19 @@ public class Controler extends HttpServlet {
 		/**** On fait les traitements sur la base de données en fonction des paramètres récupérés */
 		if (choosen_formation_id != -1) {
 			Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
-			if (choosen_formation != null){
+			if (choosen_formation == null){
+				flash_error.addMessage("La formation demandée n'a pas été trouvée");
+			} else {
 				coefficients = CoefficientDAO.getCoefficientByFormation(choosen_formation);
-				etudiants = choosen_formation.getEtudiants();				
+				etudiants = choosen_formation.getEtudiants();	
 				if(choosen_coefficient_id != -1){
 					coefficient = CoefficientDAO.getById(choosen_coefficient_id);
-					if(coefficient != null){
+					if(coefficient == null){
+						// On invalide le coefficient car l'id demandée ne correspond pas à un objet
+						choosen_coefficient_id = -1;
+						flash_error.addMessage("La matière demandée n'a pas été trouvée");
+						coefficient = new Coefficient(); // Cependant le JSP attends un coefficient, on le réinitialise donc.
+					} else {
 						for(Etudiant etudiant : etudiants){
 							Note noteEtudiant = NoteDAO.getByEtudiantAndMatiere(etudiant, coefficient.getMatiere());
 							Float resultat = noteEtudiant == null ? 0 : noteEtudiant.getResultat();
@@ -277,14 +285,12 @@ public class Controler extends HttpServlet {
 			} else {
 				actif = false;
 			}
-			coefficient = updateCoefficient(request, id, valeur, actif);
+			updateCoefficient(request, id, valeur, actif);
+			coefficient = CoefficientDAO.getById(id);
 		}
 		
 		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste (si il décide de consulter la fiche de l'élève.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
-		
-		
-		
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("choosen_coefficient_id", choosen_coefficient_id);
 		request.setAttribute("formations", formations);
@@ -301,17 +307,20 @@ public class Controler extends HttpServlet {
 	}
 	
 	/******************************************************** UPDATE VALEUR COEFFICIENT ******************************************************/
-	private Coefficient updateCoefficient(HttpServletRequest request, int id, int valeur, boolean actif){
-		Flash flash_error = new Flash("danger");
-		Flash flash_success = new Flash("success");
+	private void updateCoefficient(HttpServletRequest request, int id, int valeur, boolean actif){
 		// On récupère le coefficient en base de donnée.
 		if( valeur > 0){
 			Coefficient coeff = CoefficientDAO.getById(id);
 			coeff.setValeur(valeur);
 			coeff.setActif(actif);
-			return CoefficientDAO.update(coeff);
+			try {
+				CoefficientDAO.update(coeff);
+				flash_success.addMessage("La matière a bien été mise à jour" );
+			} catch(Exception ex){
+				flash_error.addMessage("Une erreur a été rencontrée dans la mise à jour de la matière");
+			}
 		} else {
-			return null;
+			flash_error.addMessage("La valeur du coefficient doit être supérieur à 0");
 		}
 	}
 	
@@ -349,34 +358,34 @@ public class Controler extends HttpServlet {
 
 		Etudiant etudiant = new Etudiant();
 		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
-		List<Formation> formations = FormationDAO.getAll();
 		
-		
-		String choosen_formation_id = "";
-		if(maSession.getAttribute("choosen_formation_id") != null){
-			choosen_formation_id = maSession.getAttribute("choosen_formation_id").toString();
-		}
-		
-		List<Coefficient> active_coefficients = CoefficientDAO.getActiveCoefficientByFormation(etudiant.getFormation());
-		
-		// Pour rediriger vers la formation choisie sur une page précédente.
-
-		
-		request.setAttribute("etudiant", etudiant);
-		request.setAttribute("formations", formations);
-		request.setAttribute("choosen_formation_id", choosen_formation_id);
-		request.setAttribute("active_coefficients", active_coefficients);
-		request.setAttribute("flash_error", flash_error);
-		request.setAttribute("flash_success", flash_success);
-		
-		if (etudiant == null) {
-			etudiant = new Etudiant();
+		if(etudiant == null){
+			flash_error.addMessage("Cet étudiant n'existe pas");
 			doList(request, response);
 		} else {
-			loadJSP(urlDetail, request, response);
-		}
 
-		em.close();
+			List<Formation> formations = FormationDAO.getAll();
+			
+			
+			String choosen_formation_id = "";
+			if(maSession.getAttribute("choosen_formation_id") != null){
+				choosen_formation_id = maSession.getAttribute("choosen_formation_id").toString();
+			}
+			
+			List<Coefficient> active_coefficients = CoefficientDAO.getActiveCoefficientByFormation(etudiant.getFormation());
+			
+			// Pour rediriger vers la formation choisie sur une page précédente.
+
+			request.setAttribute("etudiant", etudiant);
+			request.setAttribute("formations", formations);
+			request.setAttribute("choosen_formation_id", choosen_formation_id);
+			request.setAttribute("active_coefficients", active_coefficients);
+			request.setAttribute("flash_error", flash_error);
+			request.setAttribute("flash_success", flash_success);
+
+			loadJSP(urlDetail, request, response);
+			}
+			em.close();
 	}
 
 	/******************************************************** MODIF ETUDIANT ******************************************************/
@@ -408,7 +417,7 @@ public class Controler extends HttpServlet {
 		modifAbsence(request, response, "supprimer");
 	}
 	
-	/************************************************** UPDATE NOMBRE ABSENCE VIA BOUTONS + /- ************************************************/
+	/******************************* UPDATE NOMBRE ABSENCE VIA BOUTONS + /- (méthodes ci dessus) *************************************/
 	private void modifAbsence(HttpServletRequest request, HttpServletResponse response, String modif_type)
 			throws ServletException, IOException {
 		String referer = request.getHeader("Referer");
