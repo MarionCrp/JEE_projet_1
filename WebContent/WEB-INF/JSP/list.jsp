@@ -10,6 +10,8 @@
 <jsp:useBean id="etudiants" type="java.util.List<aideProjet.Etudiant>" scope="request"/>
 <jsp:useBean id="formations" type="java.util.List<aideProjet.Formation>" scope="request"/>
 <jsp:useBean id="choosen_formation_id" type="java.lang.Integer" scope="request"/>
+<jsp:useBean id="moyenne_generale" type="java.lang.Float" scope="request"/>
+<jsp:useBean id="previous_matiere_filtered_link" type="java.lang.String" scope="session"/>
 
 <html>
 <head>
@@ -29,7 +31,7 @@
 	<jsp:include page="<%= getServletContext().getInitParameter(\"header\")%>" />
 <ul class="nav nav-tabs"s>
   <li role="presentation" class="active"><a href="#">Etudiant</a></li>
-  <li role="presentation"><a href="matiere">Matière</a></li>
+  <li role="presentation"><a href="<%= previous_matiere_filtered_link %>">Matière</a></li>
 </ul>
 
 <form method="get" action="list">
@@ -46,6 +48,12 @@
 	    </div>
 	  </div>
 </form>
+
+
+<% if(moyenne_generale != -1){ %>
+	<b>Moyenne générale : </b><%= moyenne_generale %>
+<% } %>
+	
 <form method="post" action="modifList">
 	<input type="hidden" name="formation" value="<%= choosen_formation_id %>"%>
 	<table class="table table-bordered table-striped">

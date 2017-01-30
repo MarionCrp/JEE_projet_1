@@ -29,4 +29,17 @@ public class Services {
 		em.close();
 		return (float) (Math.round(moyenne*100.0)/100.0);
 	}
+	
+	public static Float calculeMoyenneGenerale(List<Etudiant> etudiants){
+		if(etudiants.size() > 0){
+			float somme_moyenne = 0;
+			for(Etudiant etudiant : etudiants){
+				somme_moyenne += calculeMoyenne(etudiant);
+			}
+			return (float) (Math.round(somme_moyenne/etudiants.size()*100)/100.0);
+		} else {
+			return (float) 0;
+		}
+		
+	}
 }

@@ -11,6 +11,7 @@
 <jsp:useBean id="formations" type="java.util.Collection<aideProjet.Formation>" scope="request"/>
 <jsp:useBean id="choosen_formation_id" type="java.lang.String" scope="request"/>
 <jsp:useBean id="active_coefficients" type="java.util.List<aideProjet.Coefficient>" scope="request"/>
+<jsp:useBean id="previous_link" type="java.lang.String" scope="session"/>
 
 <html>
 <head>
@@ -28,9 +29,9 @@
 <%-- Element d'action : jsp:include --%>
 	<jsp:include page="<%= getServletContext().getInitParameter(\"header\")%>" />
 
-	<a href="list?formation=<%= choosen_formation_id  %>" class="btn btn-default">
+	<a href="<%= previous_link == null ? "list" : previous_link %>" class="btn btn-default">
 		<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-		 Liste Etudiants
+		 Retour
 	</a>
 	
 	<form class="form-horizontal" method="post" action="modifEtudiant">

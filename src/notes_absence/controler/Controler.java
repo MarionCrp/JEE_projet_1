@@ -137,7 +137,8 @@ public class Controler extends HttpServlet {
 
 		// Si une formation est choisie on l'affecte en tant que paramètre de
 		// requête. Sinon on lui met comme valeur -1.
-		Integer choosen_formation_id;		
+		Integer choosen_formation_id;
+		Float moyenne_generale;
 		
 		List<Etudiant> etudiants;
 		
@@ -151,20 +152,28 @@ public class Controler extends HttpServlet {
 				flash_error.addMessage("La formation demandée n'existe pas");
 				etudiants = EtudiantDAO.getAll();
 				choosen_formation_id = -1;
+
 			}
 		} else {
 			etudiants = EtudiantDAO.getAll();
 			choosen_formation_id = -1;
 		}
 		
+		//On enregistre la page précédente (pour la page d'édition d'un élève)
+		moyenne_generale = Services.calculeMoyenneGenerale(etudiants);
+		String previous_matiere_filtered_link = (String) request.getSession().getAttribute("previous_matiere_filtered_link");
+		if(previous_matiere_filtered_link == null) previous_matiere_filtered_link = "matiere";
+	
 		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
-		
+		request.getSession().setAttribute("previous_matiere_filtered_link", previous_matiere_filtered_link);
+		request.getSession().setAttribute("previous_link", get_current_url(request));
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("formations", formations);
 		request.setAttribute("etudiants", etudiants);
 		request.setAttribute("flash_error", flash_error);
 		request.setAttribute("flash_success", flash_success);
+		request.setAttribute("moyenne_generale", moyenne_generale);
 		loadJSP(urlList, request, response);
 
 		em.close();
@@ -253,6 +262,7 @@ public class Controler extends HttpServlet {
 		if (choosen_formation_id != -1) {
 			Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
 			if (choosen_formation == null){
+				choosen_formation_id = -1;
 				flash_error.addMessage("La formation demandée n'a pas été trouvée");
 			} else {
 				coefficients = CoefficientDAO.getCoefficientByFormation(choosen_formation);
@@ -291,6 +301,8 @@ public class Controler extends HttpServlet {
 		
 		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste (si il décide de consulter la fiche de l'élève.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
+		request.getSession().setAttribute("previous_matiere_filtered_link", get_current_url(request));		
+		request.getSession().setAttribute("previous_link", get_current_url(request));
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("choosen_coefficient_id", choosen_coefficient_id);
 		request.setAttribute("formations", formations);
@@ -523,6 +535,12 @@ public class Controler extends HttpServlet {
 
 		// On modifie l'étudiant en base de données.
 		return EtudiantDAO.update(etudiant);
+	}
+	
+	private String get_current_url(HttpServletRequest request){
+		// getPathInfo().substring(1) récupère la méthode de l'url. request.getQueryString, ses paramètres.
+		// Cet url permet de pouvoir revenir sur la page préfiltrée des moyennes/notes.
+		return request.getPathInfo().substring(1) + "?" + request.getQueryString();
 	}
 	
 	/******************************************************** GENERATE DATA IN DB ******************************************************/
