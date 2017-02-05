@@ -444,13 +444,10 @@ public class Controler extends HttpServlet {
 		}
 
 		EtudiantDAO.update(etudiant);
-
-		if (maSession.getAttribute("previous_page").equals("/matiere")) {
-			doMatiere(request, response);
-		} else if (maSession.getAttribute("previous_page").equals("/detail")) {
-			doDetail(request, response);
-		} else {
-			doList(request, response);
+		if (maSession.getAttribute("previous_page").equals("/detail")) {
+			response.sendRedirect("detail?id=" + etudiant.getId());
+		} else if (maSession.getAttribute("previous_page").equals("/list")) {
+			response.sendRedirect((String) maSession.getAttribute("previous_list_link"));
 		}
 
 		em.close();
