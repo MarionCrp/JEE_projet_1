@@ -36,8 +36,6 @@ public class Controler extends HttpServlet {
 
 	private String urlList;
 	private String urlDetail;
-	private String urlModifEtudiant;
-	private String urlModifList;
 	private String urlMatiere;
 
 	private HttpSession maSession;
@@ -46,8 +44,6 @@ public class Controler extends HttpServlet {
 	public void init() throws ServletException {
 		urlList = getServletConfig().getInitParameter("urlList");
 		urlDetail = getServletConfig().getInitParameter("urlDetail");
-		urlModifEtudiant = getServletConfig().getInitParameter("urlModifEtudiant");
-		urlModifList = getServletConfig().getInitParameter("urlModifList");
 		urlMatiere = getServletConfig().getInitParameter("urlMatiere");
 		
 		GestionFactory.open();
@@ -141,18 +137,17 @@ public class Controler extends HttpServlet {
 		Float moyenne_generale;
 		
 		List<Etudiant> etudiants;
-		
 		// On test si le paramètre formation est présent dans l'url (s'il est à -1 c'est que l'utilisateur à choisi "tous les étudiants"))
-		if (request.getParameterMap().containsKey("formation") && !request.getParameter("formation").equals("-1")) {
+		if ((request.getParameterMap().containsKey("formation") && !request.getParameter("formation").equals("-1"))) {
 			try {
 				choosen_formation_id = Integer.parseInt(request.getParameter("formation"));
 				Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
 				etudiants = choosen_formation.getEtudiants();
+				
 			} catch(Exception ex) {
 				flash_error.addMessage("La formation demandée n'existe pas");
 				etudiants = EtudiantDAO.getAll();
 				choosen_formation_id = -1;
-
 			}
 		} else {
 			etudiants = EtudiantDAO.getAll();
@@ -161,13 +156,14 @@ public class Controler extends HttpServlet {
 		
 		//On enregistre la page précédente (pour la page d'édition d'un élève)
 		moyenne_generale = Services.calculeMoyenneGenerale(etudiants);
-		String previous_matiere_filtered_link = (String) request.getSession().getAttribute("previous_matiere_filtered_link");
+		String previous_matiere_filtered_link = (String) maSession.getAttribute("previous_matiere_filtered_link");
 		if(previous_matiere_filtered_link == null) previous_matiere_filtered_link = "matiere";
 	
 		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
-		request.getSession().setAttribute("previous_matiere_filtered_link", previous_matiere_filtered_link);
-		request.getSession().setAttribute("previous_link", get_current_url(request));
+		maSession.setAttribute("previous_matiere_filtered_link", previous_matiere_filtered_link);
+		maSession.setAttribute("previous_link", get_current_url(request));
+		maSession.setAttribute("previous_list_link", get_current_url(request));
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("formations", formations);
 		request.setAttribute("etudiants", etudiants);
@@ -299,10 +295,12 @@ public class Controler extends HttpServlet {
 			coefficient = CoefficientDAO.getById(id);
 		}
 		
-		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste (si il décide de consulter la fiche de l'élève.
+		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste 
+		//(si il décide de consulter la fiche de l'élève par exemple.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
-		request.getSession().setAttribute("previous_matiere_filtered_link", get_current_url(request));		
-		request.getSession().setAttribute("previous_link", get_current_url(request));
+		maSession.setAttribute("previous_matiere_filtered_link", get_current_url(request));		
+		maSession.setAttribute("previous_link", get_current_url(request));
+		
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("choosen_coefficient_id", choosen_coefficient_id);
 		request.setAttribute("formations", formations);
@@ -452,9 +450,6 @@ public class Controler extends HttpServlet {
 		} else if (maSession.getAttribute("previous_page").equals("/detail")) {
 			doDetail(request, response);
 		} else {
-			if (maSession.getAttribute("choosen_formation_id") != ""){
-				request.setAttribute("formation", maSession.getAttribute("choosen_formation_id"));
-			}
 			doList(request, response);
 		}
 

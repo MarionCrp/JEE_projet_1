@@ -76,6 +76,13 @@
 			  <td><%= Services.calculeMoyenne(etu) %></td>
 			  <td>
 			  	<input type="number" id="absence[<%= etu.getId() %>]" name="absence[<%= etu.getId() %>]" value="<%= etu.getNbAbsence() %>" placeholder="0">
+
+		   	  	  <a href="supprimerAbsence?id=<%= etu.getId() %>&formation=<%= choosen_formation_id %>" class="btn btn-default">
+			   		 <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+		   		  </a>
+			  	  <a href="ajoutAbsence?id=<%= etu.getId() %>&formation=<%= choosen_formation_id %>" class="btn btn-default">
+			   		 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+		   		  </a>
 			  </td>
 			  <td>
 			  	<a href="detail?id=<%= etu.getId() %>" class="btn btn-default">

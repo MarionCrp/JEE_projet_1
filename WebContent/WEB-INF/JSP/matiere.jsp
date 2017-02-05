@@ -16,6 +16,7 @@
 <jsp:useBean id="liste_notes" type="java.util.HashMap" scope="request"/>
 <jsp:useBean id="flash_error" type="aideProjet.Flash" scope="request"/>
 <jsp:useBean id="flash_success" type="aideProjet.Flash" scope="request"/>
+<jsp:useBean id="previous_list_link" type="java.lang.String" scope="session"/>
 
 <html>
 <head>
@@ -36,7 +37,7 @@
 
 
 <ul class="nav nav-tabs"s>
-  <li role="presentation"><a href="list">Etudiant</a></li>
+  <li role="presentation"><a href="<%= previous_list_link == null ? "list" : previous_list_link %>">Etudiant</a></li>
   <li role="presentation" class="active"><a href="#">Matière</a></li>
 </ul>
 
