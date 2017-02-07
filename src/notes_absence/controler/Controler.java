@@ -284,7 +284,12 @@ public class Controler extends HttpServlet {
 		/**** Modification du coefficient ****/
 		if(request.getParameterMap().containsKey("updateMatiere")){
 			int id = Integer.parseInt(request.getParameter("coefficient_id"));
-			int valeur = Integer.parseInt(request.getParameter("coefficient_value"));
+			// Si la valeur du coefficient envoyé n'est pas correcte, il prend une valeur par défault qui générera une erreur.
+			int valeur = -1;
+			if(request.getParameterMap().containsKey("coefficient_value") && !request.getParameter("coefficient_value").isEmpty()){
+				valeur = Integer.parseInt(request.getParameter("coefficient_value"));
+			}
+			
 			boolean actif;
 			if(request.getParameterMap().containsKey("coefficient_active") && request.getParameter("coefficient_active").equals("on")){
 				actif = true;
@@ -330,15 +335,21 @@ public class Controler extends HttpServlet {
 				flash_error.addMessage("Une erreur a été rencontrée dans la mise à jour de la matière");
 			}
 		} else {
-			flash_error.addMessage("La valeur du coefficient doit être supérieur à 0");
+			flash_error.addMessage("La valeur du coefficient n'est pas correcte");
 		}
 	}
 	
 	/******************************************************** UPDATE NOTE ******************************************************/
 	private Note updateNote(HttpServletRequest request, int id){
+		float valeur_note = -1; // Par défaut est initialisé avec une valeur incorrecte.
 		
 		// On récupère la valeur de la note et l'étudiant concerné
-		float valeur_note = Float.parseFloat(request.getParameter("note[" + id + "]"));
+		if(request.getParameterMap().containsKey("note[" + id + "]") && !request.getParameter("note[" + id + "]").isEmpty()){
+			valeur_note = Float.parseFloat(request.getParameter("note[" + id + "]"));;
+		} else {
+			flash_error.addMessage("Une note doit être un nombre décimal supérieur ou égal à 0");
+		}
+		
 		Etudiant etu = EtudiantDAO.retrieveById(id);
 		
 		// On récupère la matière
@@ -355,7 +366,13 @@ public class Controler extends HttpServlet {
 				return NoteDAO.update(note);
 			}
 		} else {
+			if(valeur_note > 20 || valeur_note < 0){
+				flash_error.addMessage("Une note doit être compris entre 0 et 20");
+			} else {
+				flash_error.addMessage("Une erreur a été rencontrée lors de l'édition d'une note");
+			}
 			return null;
+			
 		}
 	}
 
@@ -431,7 +448,7 @@ public class Controler extends HttpServlet {
 	private void modifAbsence(HttpServletRequest request, HttpServletResponse response, String modif_type)
 			throws ServletException, IOException {
 		String referer = request.getHeader("Referer");
-
+p
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
 
@@ -509,7 +526,7 @@ public class Controler extends HttpServlet {
 		for(String absences_param : absences_params){
 			if(request.getParameterMap().containsKey(absences_param)){
 				if(request.getParameter(absences_param).isEmpty()){
-					flash_error.addMessage("Le champs 'absence' ne peut être vide");
+					flash_error.addMessage("Un champs 'absence' renseigné n'est pas correct");
 				} else {
 					try {
 						nb_absence = Integer.parseInt(request.getParameter(absences_param));
