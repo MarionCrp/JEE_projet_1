@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 @Entity
+// Coefficient est une matière, affectée à une formation (qui possède donc une valeur de coefficient différent selon les formations)
 public class Coefficient implements Serializable {
 
 	@Id

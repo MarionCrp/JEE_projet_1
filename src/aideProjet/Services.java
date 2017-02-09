@@ -5,6 +5,8 @@ import javax.persistence.EntityManager;
 import java.util.*;
 
 public class Services {
+	
+	//Calcule la moyenne d'un élève. Une moyenne ne prend en comtpe que les coefficients activés.
 	public static Float calculeMoyenne(Etudiant etudiant){
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
@@ -30,6 +32,7 @@ public class Services {
 		return (float) (Math.round(moyenne*100.0)/100.0);
 	}
 	
+	// Calcule la moyenne d'un groupe (d'une formation ou de l'ensemble des élèves)
 	public static Float calculeMoyenneGenerale(List<Etudiant> etudiants){
 		if(etudiants.size() > 0){
 			float somme_moyenne = 0;

@@ -52,27 +52,6 @@ public class NoteDAO {
 		return note;
 	}
 	
-	
-	public static int removeAll() {
-		
-		// Creation de l'entity manager
-		EntityManager em = GestionFactory.factory.createEntityManager();
-
-		//
-		em.getTransaction().begin();
-		
-		// RemoveAll
-		int deletedCount = em.createQuery("DELETE FROM Note").executeUpdate();
-
-		// Commit
-		em.getTransaction().commit();
-		
-		// Close the entity manager
-		em.close();
-		
-		return deletedCount;
-	}
-	
 	public static Note getById(int id){
 		// Creation de l'entity manager
 		EntityManager em = GestionFactory.factory.createEntityManager();
