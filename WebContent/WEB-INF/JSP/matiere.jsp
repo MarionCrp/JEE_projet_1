@@ -111,7 +111,7 @@
 		    <div class="col-sm-8">
 		      <div class="checkbox">
 			    <label>
-			      <input type="checkbox" name="coefficient_active" <%= coefficient.getActif() == true ? "checked" : "" %>> Activer
+			      <input type="checkbox" name="coefficient_active" <%= coefficient.getActif() == true ? "checked" : "" %>> Activer (la compter dans le calcul de la moyenne)
 			    </label>
 			  </div>
 		    </div>
@@ -140,7 +140,7 @@
 			<%
 		} %>
 	</table>
-	<input type="submit" value="Valider" name="updateMatiere">
+	<input type="submit" value="Valider les modifications" name="updateMatiere">
 <% } %>
 
 

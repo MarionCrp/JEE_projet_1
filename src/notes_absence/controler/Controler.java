@@ -535,10 +535,19 @@ public class Controler extends HttpServlet {
 	 ******************************************************/
 	private Etudiant updateEtudiant(HttpServletRequest request, int id) {
 		Etudiant etudiant = EtudiantDAO.retrieveById(id);
-		// On affecte les données envoyées par le formulaire à l'étudiant
+		// On affecte les données envoyées par le formulaire à l'étudiant si il répond au critère ( longueur < 20 et sans chiffre
 		if (request.getParameterMap().containsKey("nom")) {
 			if (!request.getParameter("nom").isEmpty()) {
-				etudiant.setNom(request.getParameter("nom"));
+				if(request.getParameter("nom").length() < 20){
+					if(request.getParameter("nom").matches(".*\\d+.*")){
+						flash_error.addMessage("Le nom ne peut contenir de chiffre");
+					} else {
+						etudiant.setNom(request.getParameter("nom"));
+					}
+				} else {
+					flash_error.addMessage("Le nom entré est trop long");
+				}
+				
 			} else {
 				flash_error.addMessage("Le nom ne peut être vide");
 			}
@@ -546,7 +555,16 @@ public class Controler extends HttpServlet {
 
 		if (request.getParameterMap().containsKey("prenom")) {
 			if (!request.getParameter("prenom").isEmpty()) {
-				etudiant.setPrenom(request.getParameter("prenom"));
+				if(request.getParameter("prenom").length() < 20){
+					if(request.getParameter("prenom").matches(".*\\d+.*")){
+						flash_error.addMessage("Le prénom ne peut contenir de chiffre");
+					} else {
+						etudiant.setPrenom(request.getParameter("prenom"));
+					}
+				} else {
+					flash_error.addMessage("Le prenom entré est trop long");
+				}
+				
 			} else {
 				flash_error.addMessage("Le prénom ne peut être vide");
 			}

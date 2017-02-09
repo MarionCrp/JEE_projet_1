@@ -39,13 +39,13 @@
 	  <div class="form-group">
 	    <label for="nom" class="col-sm-2 control-label">Nom</label>
 	    <div class="col-sm-10">
-	      <input type="input" class="form-control" name="nom" id="nom" placeholder="Nom" value="<%= etudiant.getNom() %>">
+	      <input type="input" class="form-control" name="nom" id="nom" placeholder="Nom" value="<%= etudiant.getNom() %>" size="20">
 	    </div>
 	  </div>
 	  <div class="form-group">
 	    <label for="prenom" class="col-sm-2 control-label">Prénom</label>
 	    <div class="col-sm-10">
-	      <input type="input" class="form-control" name="prenom" id="prenom" placeholder="Prénom" value="<%= etudiant.getPrenom() %>">
+	      <input type="input" class="form-control" name="prenom" id="prenom" placeholder="Prénom" value="<%= etudiant.getPrenom() %>" size="20">
 	    </div>
 	  </div>
 	  
