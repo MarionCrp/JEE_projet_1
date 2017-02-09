@@ -409,7 +409,8 @@ public class Controler extends HttpServlet {
 
 		if (etudiant == null) {
 			flash_error.addMessage("Cet étudiant n'existe pas");
-			doList(request, response);
+			//doList(request, response);
+			response.sendRedirect("list");
 		} else {
 
 			List<Formation> formations = FormationDAO.getAll();
@@ -581,58 +582,10 @@ public class Controler extends HttpServlet {
 		// request.getQueryString, ses paramètres.
 		// Cet url permet de pouvoir revenir sur la page préfiltrée des
 		// moyennes/notes.
-		String url =  request.getPathInfo().substring(1) + "?" + request.getQueryString();
-		String action = request.getPathInfo();
-		if(this.is_a_valid_url(request)){
-			return url;
-		} else {
-			return url;
-		}
+		return request.getPathInfo().substring(1) + "?" + request.getQueryString();
 	}
 	
-	private boolean is_a_valid_url(HttpServletRequest request){
-		Map<String, String[]> params = request.getParameterMap();
-		Iterator<Entry<String, String[]>> it = params.entrySet().iterator();
-		String key = "";
-		String value = "";
-		
-		while(it.hasNext()){
-			Entry<String, String[]> param = it.next();
-			key = param.getKey();
-			value = param.getValue()[0];
-			if(this.is_a_valid_param(key, value) == false){
-				return false;
-			}
-		}
-		return true;
-	}
 	
-	private boolean is_a_valid_param(String key, String value){
-		if(key.equals("null")) return true;
-		if(Arrays.asList(Controler.ACCEPTED_PARAMS).contains(key)){
-			Object object = null;
-			int val = Integer.parseInt(value);
-			switch(key){
-			case "etudiant":
-				object = EtudiantDAO.retrieveById(val);
-				break;
-			case "matiere":
-				object = MatiereDAO.getById(val);
-				break;
-			case "formation":
-				object = FormationDAO.getById(val);
-				break;
-			case "coefficient":
-				object = CoefficientDAO.getById(val);
-				break;
-			default:
-				flash_error.addMessage("Erreur de paramètre");
-			}
-			
-			if(object != null) return true;
-		} 
-		return false;
-	}
 
 	/********************************************************
 	 * GENERATE DATA IN DB
