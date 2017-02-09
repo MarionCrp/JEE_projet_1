@@ -2,6 +2,7 @@ package notes_absence.controler;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Map.Entry;
 
 import aideProjet.*;
 
@@ -25,6 +26,7 @@ public class Controler extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static Flash flash_error = new Flash("danger");
 	private static Flash flash_success = new Flash("success");
+	private static final String[] ACCEPTED_PARAMS = { "formation", "matiere", "etudiant", "coefficient" };
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -45,7 +47,7 @@ public class Controler extends HttpServlet {
 		urlList = getServletConfig().getInitParameter("urlList");
 		urlDetail = getServletConfig().getInitParameter("urlDetail");
 		urlMatiere = getServletConfig().getInitParameter("urlMatiere");
-		
+
 		GestionFactory.open();
 		generateDataInDb();
 	}
@@ -76,7 +78,7 @@ public class Controler extends HttpServlet {
 		// On récupère l'action à exécuter
 		String action = request.getPathInfo();
 		String method = request.getMethod().toLowerCase();
-		
+
 		if (action == null) {
 			action = "/detail";
 		}
@@ -98,10 +100,10 @@ public class Controler extends HttpServlet {
 
 		} else if (method.equals("get") && action.equals("/ajoutAbsence")) {
 			doAjoutAbsence(request, response);
-			
+
 		} else if (method.equals("get") && action.equals("/supprimerAbsence")) {
 			doSupprimerAbsence(request, response);
-			
+
 		} else if (action.equals("/matiere")) {
 			doMatiere(request, response);
 
@@ -120,31 +122,30 @@ public class Controler extends HttpServlet {
 		// TODO Auto-generated method stub
 		doGet(request, response);
 	}
-	
-	
+
 	/******************************************************** LIST ******************************************************/
-	
+
 	private void doList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
-	
-		
-		List<Formation> formations = FormationDAO.getAll();		
+
+		List<Formation> formations = FormationDAO.getAll();
 
 		// Si une formation est choisie on l'affecte en tant que paramètre de
 		// requête. Sinon on lui met comme valeur -1.
 		Integer choosen_formation_id;
 		Float moyenne_generale;
-		
+
 		List<Etudiant> etudiants;
-		// On test si le paramètre formation est présent dans l'url (s'il est à -1 c'est que l'utilisateur à choisi "tous les étudiants"))
+		// On test si le paramètre formation est présent dans l'url (s'il est à
+		// -1 c'est que l'utilisateur à choisi "tous les étudiants"))
 		if ((request.getParameterMap().containsKey("formation") && !request.getParameter("formation").equals("-1"))) {
 			try {
 				choosen_formation_id = Integer.parseInt(request.getParameter("formation"));
 				Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
 				etudiants = choosen_formation.getEtudiants();
-				
-			} catch(Exception ex) {
+
+			} catch (Exception ex) {
 				flash_error.addMessage("La formation demandée n'existe pas");
 				etudiants = EtudiantDAO.getAll();
 				choosen_formation_id = -1;
@@ -153,13 +154,15 @@ public class Controler extends HttpServlet {
 			etudiants = EtudiantDAO.getAll();
 			choosen_formation_id = -1;
 		}
-		
-		//On enregistre la page précédente (pour la page d'édition d'un élève)
+
+		// On enregistre la page précédente (pour la page d'édition d'un élève)
 		moyenne_generale = Services.calculeMoyenneGenerale(etudiants);
 		String previous_matiere_filtered_link = (String) maSession.getAttribute("previous_matiere_filtered_link");
-		if(previous_matiere_filtered_link == null) previous_matiere_filtered_link = "matiere";
-	
-		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste.
+		if (previous_matiere_filtered_link == null)
+			previous_matiere_filtered_link = "matiere";
+
+		// On enregistre la formation en session pour rediriger l'utilisateur
+		// sur la bonne page lors de son retour sur la liste.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
 		maSession.setAttribute("previous_matiere_filtered_link", previous_matiere_filtered_link);
 		maSession.setAttribute("previous_link", get_current_url(request));
@@ -174,44 +177,44 @@ public class Controler extends HttpServlet {
 
 		em.close();
 	}
-	
-	
-	/******************************************************** MODIF LIST ******************************************************/
+
+	/********************************************************
+	 * MODIF LIST
+	 ******************************************************/
 	private void doModifList(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-	
 
-		// On récupère les ids des étudiants via le post et on les modifie en bouclant sur chacun
+		// On récupère les ids des étudiants via le post et on les modifie en
+		// bouclant sur chacun
 
 		String[] ids = request.getParameterValues("id");
-		
+
 		for (String id : ids) {
 			try {
 				Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
-			} catch (Exception ex){
+			} catch (Exception ex) {
 				flash_error.addMessage("Une erreur à été rencontrée lors de l'édition des absences");
 			}
 		}
-		// On retourne la formation choisie si c'est le cas : 
-		if (request.getParameterMap().containsKey("formation") && request.getParameter("formation") != "-1"){
+		// On retourne la formation choisie si c'est le cas :
+		if (request.getParameterMap().containsKey("formation") && request.getParameter("formation") != "-1") {
 			request.setAttribute("formation", request.getParameter("formation"));
 		}
-		
-		if(flash_error.hasNoMessage()){
+
+		if (flash_error.hasNoMessage()) {
 			flash_success.addMessage("Les absences ont été modifiées avec succès");
 		}
 		doList(request, response);
 	}
-	
-	
+
 	/******************************************************** MATIERE ******************************************************/
 
 	private void doMatiere(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
+
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
-		
+
 		/***** Initialisation des variables ****/
 		List<Formation> formations = FormationDAO.getAll();
 		Integer choosen_formation_id;
@@ -220,7 +223,7 @@ public class Controler extends HttpServlet {
 		List<Etudiant> etudiants = new ArrayList<Etudiant>();
 		Coefficient coefficient = new Coefficient();
 		HashMap<Etudiant, Float> liste_notes = new HashMap<Etudiant, Float>();
-		
+
 		/***** Teste des données récupérées dans le get *****/
 		// -1 si invalide.
 		if (request.getParameterMap().containsKey("formation")) {
@@ -244,34 +247,42 @@ public class Controler extends HttpServlet {
 		} else {
 			choosen_coefficient_id = -1;
 		}
-		
+
 		/***** Modification des notes ****/
-		if(request.getParameterMap().containsKey("updateMatiere")){
+		if (request.getParameterMap().containsKey("updateMatiere")) {
 			String[] ids = request.getParameterValues("id");
 			for (String id : ids) {
 				Note note = updateNote(request, Integer.parseInt(id));
 				Etudiant etu = updateEtudiant(request, Integer.parseInt(id));
 			}
 		}
-		
-		/**** On fait les traitements sur la base de données en fonction des paramètres récupérés */
+
+		/****
+		 * On fait les traitements sur la base de données en fonction des
+		 * paramètres récupérés
+		 */
 		if (choosen_formation_id != -1) {
 			Formation choosen_formation = FormationDAO.getById(choosen_formation_id);
-			if (choosen_formation == null){
+			if (choosen_formation == null) {
 				choosen_formation_id = -1;
 				flash_error.addMessage("La formation demandée n'a pas été trouvée");
 			} else {
 				coefficients = CoefficientDAO.getCoefficientByFormation(choosen_formation);
-				etudiants = choosen_formation.getEtudiants();	
-				if(choosen_coefficient_id != -1){
+				etudiants = choosen_formation.getEtudiants();
+				if (choosen_coefficient_id != -1) {
 					coefficient = CoefficientDAO.getById(choosen_coefficient_id);
-					if(coefficient == null){
-						// On invalide le coefficient car l'id demandée ne correspond pas à un objet
+					if (coefficient == null) {
+						// On invalide le coefficient car l'id demandée ne
+						// correspond pas à un objet
 						choosen_coefficient_id = -1;
 						flash_error.addMessage("La matière demandée n'a pas été trouvée");
-						coefficient = new Coefficient(); // Cependant le JSP attends un coefficient, on le réinitialise donc.
+						coefficient = new Coefficient(); // Cependant le JSP
+															// attends un
+															// coefficient, on
+															// le réinitialise
+															// donc.
 					} else {
-						for(Etudiant etudiant : etudiants){
+						for (Etudiant etudiant : etudiants) {
 							Note noteEtudiant = NoteDAO.getByEtudiantAndMatiere(etudiant, coefficient.getMatiere());
 							Float resultat = noteEtudiant == null ? 0 : noteEtudiant.getResultat();
 							liste_notes.put(etudiant, resultat);
@@ -280,18 +291,21 @@ public class Controler extends HttpServlet {
 				}
 			}
 		}
-		
+
 		/**** Modification du coefficient ****/
-		if(request.getParameterMap().containsKey("updateMatiere")){
+		if (request.getParameterMap().containsKey("updateMatiere")) {
 			int id = Integer.parseInt(request.getParameter("coefficient_id"));
-			// Si la valeur du coefficient envoyé n'est pas correcte, il prend une valeur par défault qui générera une erreur.
+			// Si la valeur du coefficient envoyé n'est pas correcte, il prend
+			// une valeur par défault qui générera une erreur.
 			int valeur = -1;
-			if(request.getParameterMap().containsKey("coefficient_value") && !request.getParameter("coefficient_value").isEmpty()){
+			if (request.getParameterMap().containsKey("coefficient_value")
+					&& !request.getParameter("coefficient_value").isEmpty()) {
 				valeur = Integer.parseInt(request.getParameter("coefficient_value"));
 			}
-			
+
 			boolean actif;
-			if(request.getParameterMap().containsKey("coefficient_active") && request.getParameter("coefficient_active").equals("on")){
+			if (request.getParameterMap().containsKey("coefficient_active")
+					&& request.getParameter("coefficient_active").equals("on")) {
 				actif = true;
 			} else {
 				actif = false;
@@ -299,13 +313,14 @@ public class Controler extends HttpServlet {
 			updateCoefficient(request, id, valeur, actif);
 			coefficient = CoefficientDAO.getById(id);
 		}
-		
-		// On enregistre la formation en session pour rediriger l'utilisateur sur la bonne page lors de son retour sur la liste 
-		//(si il décide de consulter la fiche de l'élève par exemple.
+
+		// On enregistre la formation en session pour rediriger l'utilisateur
+		// sur la bonne page lors de son retour sur la liste
+		// (si il décide de consulter la fiche de l'élève par exemple.
 		maSession.setAttribute("choosen_formation_id", choosen_formation_id);
-		maSession.setAttribute("previous_matiere_filtered_link", get_current_url(request));		
+		maSession.setAttribute("previous_matiere_filtered_link", get_current_url(request));
 		maSession.setAttribute("previous_link", get_current_url(request));
-		
+
 		request.setAttribute("choosen_formation_id", choosen_formation_id);
 		request.setAttribute("choosen_coefficient_id", choosen_coefficient_id);
 		request.setAttribute("formations", formations);
@@ -320,45 +335,52 @@ public class Controler extends HttpServlet {
 
 		em.close();
 	}
-	
-	/******************************************************** UPDATE VALEUR COEFFICIENT ******************************************************/
-	private void updateCoefficient(HttpServletRequest request, int id, int valeur, boolean actif){
+
+	/********************************************************
+	 * UPDATE VALEUR COEFFICIENT
+	 ******************************************************/
+	private void updateCoefficient(HttpServletRequest request, int id, int valeur, boolean actif) {
 		// On récupère le coefficient en base de donnée.
-		if( valeur > 0){
+		if (valeur > 0) {
 			Coefficient coeff = CoefficientDAO.getById(id);
 			coeff.setValeur(valeur);
 			coeff.setActif(actif);
 			try {
 				CoefficientDAO.update(coeff);
-				flash_success.addMessage("La matière a bien été mise à jour" );
-			} catch(Exception ex){
+				flash_success.addMessage("La matière a bien été mise à jour");
+			} catch (Exception ex) {
 				flash_error.addMessage("Une erreur a été rencontrée dans la mise à jour de la matière");
 			}
 		} else {
 			flash_error.addMessage("La valeur du coefficient n'est pas correcte");
 		}
 	}
-	
-	/******************************************************** UPDATE NOTE ******************************************************/
-	private Note updateNote(HttpServletRequest request, int id){
-		float valeur_note = -1; // Par défaut est initialisé avec une valeur incorrecte.
-		
+
+	/********************************************************
+	 * UPDATE NOTE
+	 ******************************************************/
+	private Note updateNote(HttpServletRequest request, int id) {
+		float valeur_note = -1; // Par défaut est initialisé avec une valeur
+								// incorrecte.
+
 		// On récupère la valeur de la note et l'étudiant concerné
-		if(request.getParameterMap().containsKey("note[" + id + "]") && !request.getParameter("note[" + id + "]").isEmpty()){
-			valeur_note = Float.parseFloat(request.getParameter("note[" + id + "]"));;
+		if (request.getParameterMap().containsKey("note[" + id + "]")
+				&& !request.getParameter("note[" + id + "]").isEmpty()) {
+			valeur_note = Float.parseFloat(request.getParameter("note[" + id + "]"));
+			;
 		} else {
 			flash_error.addMessage("Une note doit être un nombre décimal supérieur ou égal à 0");
 		}
-		
+
 		Etudiant etu = EtudiantDAO.retrieveById(id);
-		
+
 		// On récupère la matière
 		Coefficient coeff = CoefficientDAO.getById(Integer.parseInt(request.getParameter("coefficient")));
 		Matiere mat = coeff.getMatiere();
-		if(mat != null &&  valeur_note >= 0 && valeur_note <= 20){
+		if (mat != null && valeur_note >= 0 && valeur_note <= 20) {
 			Note note = new Note();
 			note = NoteDAO.getByEtudiantAndMatiere(etu, mat);
-			if(note == null){
+			if (note == null) {
 				note = NoteDAO.create(etu, mat, valeur_note);
 				return note;
 			} else {
@@ -366,17 +388,16 @@ public class Controler extends HttpServlet {
 				return NoteDAO.update(note);
 			}
 		} else {
-			if(valeur_note > 20 || valeur_note < 0){
+			if (valeur_note > 20 || valeur_note < 0) {
 				flash_error.addMessage("Une note doit être compris entre 0 et 20");
 			} else {
 				flash_error.addMessage("Une erreur a été rencontrée lors de l'édition d'une note");
 			}
 			return null;
-			
+
 		}
 	}
 
-	
 	/******************************************************** DETAILS ******************************************************/
 	private void doDetail(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -385,22 +406,22 @@ public class Controler extends HttpServlet {
 
 		Etudiant etudiant = new Etudiant();
 		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
-		
-		if(etudiant == null){
+
+		if (etudiant == null) {
 			flash_error.addMessage("Cet étudiant n'existe pas");
 			doList(request, response);
 		} else {
 
 			List<Formation> formations = FormationDAO.getAll();
-			
-			
+
 			String choosen_formation_id = "";
-			if(maSession.getAttribute("choosen_formation_id") != null){
+			if (maSession.getAttribute("choosen_formation_id") != null) {
 				choosen_formation_id = maSession.getAttribute("choosen_formation_id").toString();
 			}
-			
-			List<Coefficient> active_coefficients = CoefficientDAO.getActiveCoefficientByFormation(etudiant.getFormation());
-			
+
+			List<Coefficient> active_coefficients = CoefficientDAO
+					.getActiveCoefficientByFormation(etudiant.getFormation());
+
 			// Pour rediriger vers la formation choisie sur une page précédente.
 
 			request.setAttribute("etudiant", etudiant);
@@ -411,50 +432,56 @@ public class Controler extends HttpServlet {
 			request.setAttribute("flash_success", flash_success);
 
 			loadJSP(urlDetail, request, response);
-			}
-			em.close();
+		}
+		em.close();
 	}
 
-	/******************************************************** MODIF ETUDIANT ******************************************************/
+	/********************************************************
+	 * MODIF ETUDIANT
+	 ******************************************************/
 	private void doModifEtudiant(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
+
 		// On récupère l'étudiant en base de donnée.
 		try {
 			Etudiant new_etu = updateEtudiant(request, Integer.parseInt(request.getParameter("id")));
 			flash_success.addMessage("La fiche de l'élève a été modifiée avec succès");
 			doDetail(request, response);
-			
-		} catch(Exception ex) {
+
+		} catch (Exception ex) {
 			flash_error.addMessage("Une erreur est survenue lors de l'édition de la fiche de l'élève");
 			doList(request, response);
 		}
 	}
-	
 
-	/******************************************************** DO AJOUT ABSENCE ******************************************************/
+	/********************************************************
+	 * DO AJOUT ABSENCE
+	 ******************************************************/
 	private void doAjoutAbsence(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		modifAbsence(request, response, "ajouter");
 	}
-	
-	/******************************************************** DO SUPPRIMER ABSENCE ******************************************************/
+
+	/********************************************************
+	 * DO SUPPRIMER ABSENCE
+	 ******************************************************/
 	private void doSupprimerAbsence(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		modifAbsence(request, response, "supprimer");
 	}
-	
-	/******************************* UPDATE NOMBRE ABSENCE VIA BOUTONS + /- (méthodes ci dessus) *************************************/
+
+	/*******************************
+	 * UPDATE NOMBRE ABSENCE VIA BOUTONS + /- (méthodes ci dessus)
+	 *************************************/
 	private void modifAbsence(HttpServletRequest request, HttpServletResponse response, String modif_type)
 			throws ServletException, IOException {
 		String referer = request.getHeader("Referer");
-p
 		EntityManager em = GestionFactory.factory.createEntityManager();
 		em.getTransaction().begin();
 
 		Etudiant etudiant = new Etudiant();
 		etudiant = EtudiantDAO.retrieveById(Integer.parseInt(request.getParameter("id")));
-		if(modif_type.equals("ajouter")){
+		if (modif_type.equals("ajouter")) {
 			etudiant.addAbsence();
 		} else {
 			etudiant.supprAbsence();
@@ -471,7 +498,8 @@ p
 	}
 
 	/**
-	/******************************************************** LOAD JSP ******************************************************
+	 * /******************************************************** LOAD JSP
+	 * ******************************************************
 	 * 
 	 * @param url
 	 * @param request
@@ -500,21 +528,23 @@ p
 		// rheader.include(request, response);
 		rd.forward(request, response);
 	}
-	
-	/******************************************************** UPDATE ETUDIANT ******************************************************/
+
+	/********************************************************
+	 * UPDATE ETUDIANT
+	 ******************************************************/
 	private Etudiant updateEtudiant(HttpServletRequest request, int id) {
 		Etudiant etudiant = EtudiantDAO.retrieveById(id);
 		// On affecte les données envoyées par le formulaire à l'étudiant
-		if(request.getParameterMap().containsKey("nom")) {
-			if(!request.getParameter("nom").isEmpty()){
+		if (request.getParameterMap().containsKey("nom")) {
+			if (!request.getParameter("nom").isEmpty()) {
 				etudiant.setNom(request.getParameter("nom"));
 			} else {
 				flash_error.addMessage("Le nom ne peut être vide");
 			}
 		}
-		
-		if(request.getParameterMap().containsKey("prenom")) {
-			if(!request.getParameter("prenom").isEmpty()){
+
+		if (request.getParameterMap().containsKey("prenom")) {
+			if (!request.getParameter("prenom").isEmpty()) {
 				etudiant.setPrenom(request.getParameter("prenom"));
 			} else {
 				flash_error.addMessage("Le prénom ne peut être vide");
@@ -522,20 +552,20 @@ p
 		}
 
 		int nb_absence = -1;
-		String[] absences_params = {"absence[" + id + "]", "absence" };
-		for(String absences_param : absences_params){
-			if(request.getParameterMap().containsKey(absences_param)){
-				if(request.getParameter(absences_param).isEmpty()){
+		String[] absences_params = { "absence[" + id + "]", "absence" };
+		for (String absences_param : absences_params) {
+			if (request.getParameterMap().containsKey(absences_param)) {
+				if (request.getParameter(absences_param).isEmpty()) {
 					flash_error.addMessage("Un champs 'absence' renseigné n'est pas correct");
 				} else {
 					try {
 						nb_absence = Integer.parseInt(request.getParameter(absences_param));
-						if(nb_absence >= 0){
+						if (nb_absence >= 0) {
 							etudiant.setNbAbsence(nb_absence);
 						} else {
 							flash_error.addMessage("Le nombre d'absence ne peut être négatif!");
 						}
-					} catch(Exception ex){
+					} catch (Exception ex) {
 						flash_error.addMessage("Une erreur est survenue lors de la modification des absences");
 					}
 				}
@@ -545,61 +575,115 @@ p
 		// On modifie l'étudiant en base de données.
 		return EtudiantDAO.update(etudiant);
 	}
-	
-	private String get_current_url(HttpServletRequest request){
-		// getPathInfo().substring(1) récupère la méthode de l'url. request.getQueryString, ses paramètres.
-		// Cet url permet de pouvoir revenir sur la page préfiltrée des moyennes/notes.
-		return request.getPathInfo().substring(1) + "?" + request.getQueryString();
+
+	private String get_current_url(HttpServletRequest request) {
+		// getPathInfo().substring(1) récupère la méthode de l'url.
+		// request.getQueryString, ses paramètres.
+		// Cet url permet de pouvoir revenir sur la page préfiltrée des
+		// moyennes/notes.
+		String url =  request.getPathInfo().substring(1) + "?" + request.getQueryString();
+		String action = request.getPathInfo();
+		if(this.is_a_valid_url(request)){
+			return url;
+		} else {
+			return url;
+		}
 	}
 	
-	/******************************************************** GENERATE DATA IN DB ******************************************************/
+	private boolean is_a_valid_url(HttpServletRequest request){
+		Map<String, String[]> params = request.getParameterMap();
+		Iterator<Entry<String, String[]>> it = params.entrySet().iterator();
+		String key = "";
+		String value = "";
+		
+		while(it.hasNext()){
+			Entry<String, String[]> param = it.next();
+			key = param.getKey();
+			value = param.getValue()[0];
+			if(this.is_a_valid_param(key, value) == false){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean is_a_valid_param(String key, String value){
+		if(key.equals("null")) return true;
+		if(Arrays.asList(Controler.ACCEPTED_PARAMS).contains(key)){
+			Object object = null;
+			int val = Integer.parseInt(value);
+			switch(key){
+			case "etudiant":
+				object = EtudiantDAO.retrieveById(val);
+				break;
+			case "matiere":
+				object = MatiereDAO.getById(val);
+				break;
+			case "formation":
+				object = FormationDAO.getById(val);
+				break;
+			case "coefficient":
+				object = CoefficientDAO.getById(val);
+				break;
+			default:
+				flash_error.addMessage("Erreur de paramètre");
+			}
+			
+			if(object != null) return true;
+		} 
+		return false;
+	}
+
+	/********************************************************
+	 * GENERATE DATA IN DB
+	 ******************************************************/
 	private void generateDataInDb() {
-			EntityManager em = GestionFactory.factory.createEntityManager();
-			em.getTransaction().begin();
-			Formation simo = new Formation();
-			Formation aspe = new Formation();
-			Formation big_data = new Formation();
-			if (FormationDAO.getAll().size() == 0) {
-				simo = FormationDAO.create("SIMO");
-				aspe = FormationDAO.create("ASPE");
-				big_data = FormationDAO.create("BIG DATA");
-			} else {
-				simo = FormationDAO.getByIntitule("SIMO");
-				aspe = FormationDAO.getByIntitule("ASPE");
-				big_data = FormationDAO.getByIntitule("BIG DATA");
+		EntityManager em = GestionFactory.factory.createEntityManager();
+		em.getTransaction().begin();
+		Formation simo = new Formation();
+		Formation aspe = new Formation();
+		Formation big_data = new Formation();
+		if (FormationDAO.getAll().size() == 0) {
+			simo = FormationDAO.create("SIMO");
+			aspe = FormationDAO.create("ASPE");
+			big_data = FormationDAO.create("BIG DATA");
+		} else {
+			simo = FormationDAO.getByIntitule("SIMO");
+			aspe = FormationDAO.getByIntitule("ASPE");
+			big_data = FormationDAO.getByIntitule("BIG DATA");
+		}
+
+		if (EtudiantDAO.getAll().size() == 0) {
+			// CrÃ©ation des Ã©tudiants
+			Etudiant kevin = EtudiantDAO.create("Kévin", "Coissard", simo);
+			Etudiant elodie = EtudiantDAO.create("Elodie", "Goy", simo);
+			Etudiant david = EtudiantDAO.create("David", "Cotte", simo);
+			Etudiant milena = EtudiantDAO.create("Miléna", "Charles", simo);
+
+			Etudiant jeremie = EtudiantDAO.create("Jérémie", "Guillot", aspe);
+			Etudiant martin = EtudiantDAO.create("Martin", "Bolot", aspe);
+			Etudiant yoann = EtudiantDAO.create("Yoann", "Merle", aspe);
+			Etudiant jean = EtudiantDAO.create("Jean", "Debard", aspe);
+
+			Etudiant amandine = EtudiantDAO.create("Amandine", "Henriet", big_data);
+
+			if (MatiereDAO.getAll().size() == 0) {
+				// Création des Matiere
+				Matiere mat1 = MatiereDAO.create("SIMO-MI1-PROJET");
+				Matiere mat2 = MatiereDAO.create("SIMO-MI1-DS");
+				Matiere mat3 = MatiereDAO.create("SIGD-MI4-PROJET");
+				Matiere mat4 = MatiereDAO.create("SIGD-MI4-DS");
+
+				Coefficient coeff1 = CoefficientDAO.create(mat1, simo, 10, false);
+				Coefficient coeff3 = CoefficientDAO.create(mat2, simo, 17, false);
+				Coefficient coeff4 = CoefficientDAO.create(mat3, simo, 14, false);
+				Coefficient coeff5 = CoefficientDAO.create(mat4, simo, 10, false);
+				Coefficient coeff6 = CoefficientDAO.create(mat3, big_data, 11, false);
+				Coefficient coeff7 = CoefficientDAO.create(mat4, big_data, 8, false);
 			}
-	
-			if (EtudiantDAO.getAll().size() == 0) {
-				// CrÃ©ation des Ã©tudiants
-				Etudiant kevin = EtudiantDAO.create("Kévin", "Coissard", simo);
-				Etudiant elodie = EtudiantDAO.create("Elodie", "Goy", simo);
-				Etudiant david = EtudiantDAO.create("David", "Cotte", simo);
-				Etudiant milena = EtudiantDAO.create("Miléna", "Charles", simo);
-	
-				Etudiant jeremie = EtudiantDAO.create("Jérémie", "Guillot", aspe);
-				Etudiant martin = EtudiantDAO.create("Martin", "Bolot", aspe);
-				Etudiant yoann = EtudiantDAO.create("Yoann", "Merle", aspe);
-				Etudiant jean = EtudiantDAO.create("Jean", "Debard", aspe);
-	
-				Etudiant amandine = EtudiantDAO.create("Amandine", "Henriet", big_data);
-	
-				if (MatiereDAO.getAll().size() == 0) {
-					// Création des Matiere
-					Matiere mat1 = MatiereDAO.create("SIMO-MI1-PROJET");
-					Matiere mat2 = MatiereDAO.create("SIMO-MI1-DS");
-					Matiere mat3 = MatiereDAO.create("SIGD-MI4-PROJET");
-					Matiere mat4 = MatiereDAO.create("SIGD-MI4-DS");
-	
-					Coefficient coeff1 = CoefficientDAO.create(mat1, simo, 10, false);
-					Coefficient coeff3 = CoefficientDAO.create(mat2, simo, 17, false);
-					Coefficient coeff4 = CoefficientDAO.create(mat3, simo, 14, false);
-					Coefficient coeff5 = CoefficientDAO.create(mat4, simo, 10, false);
-					Coefficient coeff6 = CoefficientDAO.create(mat3, big_data, 11, false);
-					Coefficient coeff7 = CoefficientDAO.create(mat4, big_data, 8, false);
-				}
-			}
-	
-			em.close();
+		}
+
+		em.close();
 
 	}
 }
